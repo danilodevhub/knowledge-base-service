@@ -14,10 +14,14 @@ export interface IHierarchical<T> {
     children: T[];
 }
 
+// Import TopicResource interface
+import { TopicResource } from './topicResource';
+
 // Topic interfaces
 export interface ITopic extends IVersionable, IHierarchical<ITopic> {
     name: string;
     content: string;
+    resource: TopicResource | null; // Changed from resources array to single resource
 }
 
 // Concrete implementation
@@ -30,6 +34,7 @@ export interface Topic extends ITopic {
     version: number;
     parentTopicId: string | null;
     childrenTopics: Topic[];
+    resource: TopicResource | null; // Changed from resources array to single resource
 }
 
 // Topic version interface
@@ -38,6 +43,7 @@ export interface TopicVersion extends IEntity {
     name: string;
     content: string;
     version: number;
+    resource: TopicResource | null; // Changed from resources array to single resource
 }
 
 // Abstract classes for implementing design patterns
@@ -59,8 +65,8 @@ export abstract class VersionedEntity implements IVersionable {
 
 // Factory pattern for creating topics
 export abstract class TopicFactory {
-    abstract createTopic(name: string, content: string, parentTopicId: string | null): Topic;
-    abstract createTopicVersion(topicId: string, name: string, content: string, version: number): TopicVersion;
+    abstract createTopic(name: string, content: string, parentTopicId: string | null, resource?: TopicResource | null): Topic;
+    abstract createTopicVersion(topicId: string, name: string, content: string, version: number, resource?: TopicResource | null): TopicVersion;
 }
 
 // Composite pattern for hierarchical topics

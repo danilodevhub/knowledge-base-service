@@ -1,5 +1,7 @@
 import { Topic, TopicVersion } from '../models/topic';
 import { TopicImpl, TopicVersionImpl, TopicFactoryImpl, CompositeTopic } from '../models/topicImpl';
+import { TopicResource } from '../models/topicResource';
+import { v4 as uuidv4 } from 'uuid';
 
 // In-memory storage (replace with database in production)
 let topics: Topic[] = [];
@@ -34,15 +36,44 @@ export class TopicService {
     }
 
     // Create a new topic
-    createTopic(name: string, content: string, parentTopicId: string | null = null): Topic {
-        const newTopic = this.topicFactory.createTopic(name, content, parentTopicId);
+    createTopic(
+        name: string, 
+        content: string, 
+        parentTopicId: string | null = null,
+        resourceData?: {
+            url: string;
+            description: string;
+            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf';
+        }
+    ): Topic {
+        // Create resource if data is provided
+        let resource: TopicResource | null = null;
+        if (resourceData) {
+            resource = {
+                id: uuidv4(),
+                topicId: '', // Will be set after topic creation
+                url: resourceData.url,
+                description: resourceData.description,
+                type: resourceData.type,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+        }
+
+        const newTopic = this.topicFactory.createTopic(name, content, parentTopicId, resource);
+        
+        // Set the topicId in the resource if it exists
+        if (resource) {
+            resource.topicId = newTopic.id;
+        }
         
         // Create initial version
         const initialVersion = this.topicFactory.createTopicVersion(
             newTopic.id,
             name,
             content,
-            1
+            1,
+            resource
         );
         
         // Add to storage
@@ -62,7 +93,16 @@ export class TopicService {
     }
 
     // Update a topic (creates a new version)
-    updateTopic(id: string, name: string, content: string): Topic | null {
+    updateTopic(
+        id: string, 
+        name: string, 
+        content: string,
+        resourceData?: {
+            url: string;
+            description: string;
+            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf';
+        }
+    ): Topic | null {
         const existingTopic = this.getTopicById(id);
         if (!existingTopic) {
             return null;
@@ -74,18 +114,91 @@ export class TopicService {
         existingTopic.updatedAt = new Date();
         existingTopic.version += 1;
 
+        // Update or create resource if data is provided
+        if (resourceData) {
+            if (existingTopic.resource) {
+                // Update existing resource
+                existingTopic.resource.url = resourceData.url;
+                existingTopic.resource.description = resourceData.description;
+                existingTopic.resource.type = resourceData.type;
+                existingTopic.resource.updatedAt = new Date();
+            } else {
+                // Create new resource
+                existingTopic.resource = {
+                    id: uuidv4(),
+                    topicId: existingTopic.id,
+                    url: resourceData.url,
+                    description: resourceData.description,
+                    type: resourceData.type,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+            }
+        }
+
         // Create a new version record
         const newVersion = this.topicFactory.createTopicVersion(
             id,
             name,
             content,
-            existingTopic.version
+            existingTopic.version,
+            existingTopic.resource ? { ...existingTopic.resource } : null
         );
         
         // Add to versions storage
         topicVersions.push(newVersion);
         
         return existingTopic;
+    }
+
+    // Add or update a resource for a topic
+    setTopicResource(
+        topicId: string,
+        url: string,
+        description: string,
+        type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf'
+    ): Topic | null {
+        const topic = this.getTopicById(topicId);
+        if (!topic) {
+            return null;
+        }
+
+        // Create or update the resource
+        if (topic.resource) {
+            // Update existing resource
+            topic.resource.url = url;
+            topic.resource.description = description;
+            topic.resource.type = type;
+            topic.resource.updatedAt = new Date();
+        } else {
+            // Create new resource
+            topic.resource = {
+                id: uuidv4(),
+                topicId,
+                url,
+                description,
+                type,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+        }
+
+        topic.updatedAt = new Date();
+        return topic;
+    }
+
+    // Remove a resource from a topic
+    removeTopicResource(topicId: string): Topic | null {
+        const topic = this.getTopicById(topicId);
+        if (!topic || !topic.resource) {
+            return null;
+        }
+
+        // Remove the resource
+        topic.resource = null;
+        topic.updatedAt = new Date();
+
+        return topic;
     }
 
     // Delete a topic and all its versions

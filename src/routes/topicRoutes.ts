@@ -7,7 +7,9 @@ import {
     createTopic, 
     updateTopic, 
     deleteTopic,
-    getTopicHierarchy
+    getTopicHierarchy,
+    setTopicResource,
+    removeTopicResource
 } from '../controllers/topicController';
 
 const router: Router = express.Router();
@@ -32,6 +34,12 @@ router.post('/', createTopic);
 
 // PUT/update a topic (creates a new version)
 router.put('/:id', updateTopic);
+
+// PUT/set resource for a topic
+router.put('/:id/resource', setTopicResource);
+
+// DELETE resource from a topic
+router.delete('/:id/resource', removeTopicResource);
 
 // DELETE a topic
 router.delete('/:id', deleteTopic);

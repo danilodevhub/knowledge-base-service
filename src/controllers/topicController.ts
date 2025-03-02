@@ -70,14 +70,41 @@ export const getAllTopicVersions = (req: Request, res: Response, next: NextFunct
 // POST a new topic
 export const createTopic = (req: Request, res: Response, next: NextFunction): void => {
   try {
-    const { name, content, parentTopicId } = req.body;
+    const { name, content, parentTopicId, resource } = req.body;
     
     if (!name || !content) {
       res.status(400).json({ message: 'Name and content are required' });
       return;
     }
     
-    const newTopic = topicService.createTopic(name, content, parentTopicId || null);
+    // Validate resource if provided
+    let resourceData;
+    if (resource) {
+      const { url, description, type } = resource;
+      if (!url || !description || !type) {
+        res.status(400).json({ message: 'Resource must have url, description, and type' });
+        return;
+      }
+      
+      // Validate resource type
+      const validTypes = ['video', 'article', 'podcast', 'audio', 'image', 'pdf'];
+      if (!validTypes.includes(type)) {
+        res.status(400).json({ 
+          message: `Invalid resource type. Must be one of: ${validTypes.join(', ')}` 
+        });
+        return;
+      }
+      
+      resourceData = { url, description, type };
+    }
+    
+    const newTopic = topicService.createTopic(
+      name, 
+      content, 
+      parentTopicId || null,
+      resourceData
+    );
+    
     res.status(201).json(newTopic);
   } catch (error) {
     next(error);
@@ -88,17 +115,93 @@ export const createTopic = (req: Request, res: Response, next: NextFunction): vo
 export const updateTopic = (req: Request, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
-    const { name, content } = req.body;
+    const { name, content, resource } = req.body;
     
     if (!name || !content) {
       res.status(400).json({ message: 'Name and content are required' });
       return;
     }
     
-    const updatedTopic = topicService.updateTopic(id, name, content);
+    // Validate resource if provided
+    let resourceData;
+    if (resource) {
+      const { url, description, type } = resource;
+      if (!url || !description || !type) {
+        res.status(400).json({ message: 'Resource must have url, description, and type' });
+        return;
+      }
+      
+      // Validate resource type
+      const validTypes = ['video', 'article', 'podcast', 'audio', 'image', 'pdf'];
+      if (!validTypes.includes(type)) {
+        res.status(400).json({ 
+          message: `Invalid resource type. Must be one of: ${validTypes.join(', ')}` 
+        });
+        return;
+      }
+      
+      resourceData = { url, description, type };
+    }
+    
+    const updatedTopic = topicService.updateTopic(id, name, content, resourceData);
     
     if (!updatedTopic) {
       res.status(404).json({ message: 'Topic not found' });
+      return;
+    }
+    
+    res.status(200).json(updatedTopic);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT/set resource for a topic
+export const setTopicResource = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    const topicId = req.params.id;
+    const { url, description, type } = req.body;
+    
+    if (!url || !description || !type) {
+      res.status(400).json({ message: 'URL, description, and type are required' });
+      return;
+    }
+    
+    // Validate resource type
+    const validTypes = ['video', 'article', 'podcast', 'audio', 'image', 'pdf'];
+    if (!validTypes.includes(type)) {
+      res.status(400).json({ 
+        message: `Invalid resource type. Must be one of: ${validTypes.join(', ')}` 
+      });
+      return;
+    }
+    
+    const updatedTopic = topicService.setTopicResource(
+      topicId,
+      url,
+      description,
+      type as 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf'
+    );
+    
+    if (!updatedTopic) {
+      res.status(404).json({ message: 'Topic not found' });
+      return;
+    }
+    
+    res.status(200).json(updatedTopic);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE resource from a topic
+export const removeTopicResource = (req: Request, res: Response, next: NextFunction): void => {
+  try {
+    const topicId = req.params.id;
+    const updatedTopic = topicService.removeTopicResource(topicId);
+    
+    if (!updatedTopic) {
+      res.status(404).json({ message: 'Topic not found or has no resource' });
       return;
     }
     
