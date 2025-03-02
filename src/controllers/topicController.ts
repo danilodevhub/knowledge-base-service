@@ -1,11 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction } from 'express';
 import { TopicService } from '../services/topicService';
+import { AuthRequest } from '../middleware/authMiddleware';
+import { Response } from 'express';
 
 // Initialize the topic service
 const topicService = new TopicService();
 
 // GET all topics
-export const getAllTopics = (req: Request, res: Response, next: NextFunction): void => {
+export const getAllTopics = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const topics = topicService.getAllTopics();
     res.status(200).json(topics);
@@ -15,7 +17,7 @@ export const getAllTopics = (req: Request, res: Response, next: NextFunction): v
 };
 
 // GET a specific topic by ID
-export const getTopicById = (req: Request, res: Response, next: NextFunction): void => {
+export const getTopicById = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
     const topic = topicService.getTopicById(id);
@@ -32,7 +34,7 @@ export const getTopicById = (req: Request, res: Response, next: NextFunction): v
 };
 
 // GET a specific version of a topic
-export const getTopicVersion = (req: Request, res: Response, next: NextFunction): void => {
+export const getTopicVersion = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const topicId = req.params.id;
     const version = parseInt(req.params.version, 10);
@@ -56,7 +58,7 @@ export const getTopicVersion = (req: Request, res: Response, next: NextFunction)
 };
 
 // GET all versions of a topic
-export const getAllTopicVersions = (req: Request, res: Response, next: NextFunction): void => {
+export const getAllTopicVersions = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const topicId = req.params.id;
     const versions = topicService.getAllTopicVersions(topicId);
@@ -68,7 +70,7 @@ export const getAllTopicVersions = (req: Request, res: Response, next: NextFunct
 };
 
 // POST a new topic
-export const createTopic = (req: Request, res: Response, next: NextFunction): void => {
+export const createTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const { name, content, parentTopicId, resource } = req.body;
     
@@ -98,6 +100,9 @@ export const createTopic = (req: Request, res: Response, next: NextFunction): vo
       resourceData = { url, description, type };
     }
     
+    // Log the user who created the topic
+    console.log(`Topic created by user: ${req.user?.id} (${req.user?.role})`);
+    
     const newTopic = topicService.createTopic(
       name, 
       content, 
@@ -112,7 +117,7 @@ export const createTopic = (req: Request, res: Response, next: NextFunction): vo
 };
 
 // PUT/update a topic (creates a new version)
-export const updateTopic = (req: Request, res: Response, next: NextFunction): void => {
+export const updateTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
     const { name, content, resource } = req.body;
@@ -143,6 +148,9 @@ export const updateTopic = (req: Request, res: Response, next: NextFunction): vo
       resourceData = { url, description, type };
     }
     
+    // Log the user who updated the topic
+    console.log(`Topic updated by user: ${req.user?.id} (${req.user?.role})`);
+    
     const updatedTopic = topicService.updateTopic(id, name, content, resourceData);
     
     if (!updatedTopic) {
@@ -157,7 +165,7 @@ export const updateTopic = (req: Request, res: Response, next: NextFunction): vo
 };
 
 // PUT/set resource for a topic
-export const setTopicResource = (req: Request, res: Response, next: NextFunction): void => {
+export const setTopicResource = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const topicId = req.params.id;
     const { url, description, type } = req.body;
@@ -175,6 +183,9 @@ export const setTopicResource = (req: Request, res: Response, next: NextFunction
       });
       return;
     }
+    
+    // Log the user who set the resource
+    console.log(`Resource set by user: ${req.user?.id} (${req.user?.role})`);
     
     const updatedTopic = topicService.setTopicResource(
       topicId,
@@ -195,9 +206,13 @@ export const setTopicResource = (req: Request, res: Response, next: NextFunction
 };
 
 // DELETE resource from a topic
-export const removeTopicResource = (req: Request, res: Response, next: NextFunction): void => {
+export const removeTopicResource = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const topicId = req.params.id;
+    
+    // Log the user who removed the resource
+    console.log(`Resource removed by user: ${req.user?.id} (${req.user?.role})`);
+    
     const updatedTopic = topicService.removeTopicResource(topicId);
     
     if (!updatedTopic) {
@@ -212,9 +227,13 @@ export const removeTopicResource = (req: Request, res: Response, next: NextFunct
 };
 
 // DELETE a topic
-export const deleteTopic = (req: Request, res: Response, next: NextFunction): void => {
+export const deleteTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
+    
+    // Log the user who deleted the topic
+    console.log(`Topic deleted by user: ${req.user?.id} (${req.user?.role})`);
+    
     const deleted = topicService.deleteTopic(id);
     
     if (!deleted) {
@@ -229,7 +248,7 @@ export const deleteTopic = (req: Request, res: Response, next: NextFunction): vo
 };
 
 // GET topic hierarchy
-export const getTopicHierarchy = (req: Request, res: Response, next: NextFunction): void => {
+export const getTopicHierarchy = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
     const hierarchy = topicService.getTopicHierarchy(id);

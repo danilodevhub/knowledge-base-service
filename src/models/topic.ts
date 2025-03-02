@@ -26,15 +26,15 @@ export interface ITopic extends IVersionable, IHierarchical<ITopic> {
 
 // Concrete implementation
 export interface Topic extends ITopic {
-    id: string;
-    name: string;
-    content: string;
-    createdAt: Date;
-    updatedAt: Date;
-    version: number;
-    parentTopicId: string | null;
-    childrenTopics: Topic[];
-    resource: TopicResource | null; // Changed from resources array to single resource
+    id: string; //TODO check if this is needed or we can use the id from the ITopic interface
+    name: string; //TODO check if this is needed or we can use the name from the ITopic interface
+    content: string; //TODO check if this is needed or we can use the content from the ITopic interface
+    createdAt: Date; //TODO check if this is needed or we can use the createdAt from the ITopic interface
+    updatedAt: Date; //TODO check if this is needed or we can use the updatedAt from the ITopic interface
+    version: number; //TODO check if this is needed or we can use the version from the ITopic interface
+    parentTopicId: string | null; //TODO check if this is needed or we can use the parentTopicId from the ITopic interface
+    childrenTopics: Topic[]; //TODO check if this is needed or we can use the childrenTopics from the ITopic interface
+    resource: TopicResource | null;
 }
 
 // Topic version interface
