@@ -14,7 +14,7 @@ export class TopicService {
         this.topicFactory = new TopicFactoryImpl();
     }
 
-    // Get all topics (latest versions only)
+    // Get all topics (latest versions)
     getAllTopics(): Topic[] {
         return topics;
     }
@@ -25,252 +25,202 @@ export class TopicService {
     }
 
     // Get a specific version of a topic
-    getTopicVersion(topicId: string, version: number): TopicVersion | null {
-        return topicVersions.find(tv => tv.topicId === topicId && tv.version === version) || null;
+    getTopicVersion(id: string, version: number): TopicVersion | null {
+        return topicVersions.find(tv => tv.topicId === id && tv.version === version) || null;
     }
 
     // Get all versions of a topic
-    getAllTopicVersions(topicId: string): TopicVersion[] {
-        return topicVersions.filter(tv => tv.topicId === topicId)
-            .sort((a, b) => b.version - a.version); // Sort by version descending
+    getAllTopicVersions(id: string): TopicVersion[] {
+        return topicVersions.filter(tv => tv.topicId === id);
     }
 
     // Create a new topic
     createTopic(
-        name: string, 
-        content: string, 
-        parentTopicId: string | null = null,
-        resourceData?: {
-            url: string;
-            description: string;
-            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf';
-        }
+        title: string, 
+        description: string, 
+        parentId: string | null,
+        ownerId: string,
+        resourceData?: { url: string, description: string, type: string }
     ): Topic {
         // Create resource if data is provided
-        let resource: TopicResource | null = null;
+        let resource: TopicResource | undefined = undefined;
+        
         if (resourceData) {
             resource = {
                 id: uuidv4(),
-                topicId: '', // Will be set after topic creation
                 url: resourceData.url,
                 description: resourceData.description,
                 type: resourceData.type,
-                createdAt: new Date(),
-                updatedAt: new Date()
+                topicId: '' // Will be set after topic creation
             };
         }
-
-        const newTopic = this.topicFactory.createTopic(name, content, parentTopicId, resource);
         
-        // Set the topicId in the resource if it exists
+        // Create the topic
+        const topic = this.topicFactory.createTopic(title, description, parentId, ownerId, resource);
+        
+        // Set the topicId on the resource if it exists
         if (resource) {
-            resource.topicId = newTopic.id;
+            resource.topicId = topic.id;
         }
+        
+        // Store the topic
+        topics.push(topic);
         
         // Create initial version
-        const initialVersion = this.topicFactory.createTopicVersion(
-            newTopic.id,
-            name,
-            content,
-            1,
-            resource
-        );
+        const topicVersion = this.topicFactory.createTopicVersion(topic);
+        topicVersions.push(topicVersion);
         
-        // Add to storage
-        topics.push(newTopic);
-        topicVersions.push(initialVersion);
-        
-        // Update parent-child relationship if parent exists
-        if (parentTopicId) {
-            const parentTopic = this.getTopicById(parentTopicId);
-            if (parentTopic) {
-                parentTopic.childrenTopics.push(newTopic);
-                parentTopic.children.push(newTopic);
-            }
-        }
-        
-        return newTopic;
+        return topic;
     }
 
     // Update a topic (creates a new version)
     updateTopic(
         id: string, 
-        name: string, 
-        content: string,
-        resourceData?: {
-            url: string;
-            description: string;
-            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf';
-        }
-    ): Topic | null {
-        const existingTopic = this.getTopicById(id);
-        if (!existingTopic) {
-            return null;
-        }
-
-        // Update the topic
-        existingTopic.name = name;
-        existingTopic.content = content;
-        existingTopic.updatedAt = new Date();
-        existingTopic.version += 1;
-
-        // Update or create resource if data is provided
-        if (resourceData) {
-            if (existingTopic.resource) {
-                // Update existing resource
-                existingTopic.resource.url = resourceData.url;
-                existingTopic.resource.description = resourceData.description;
-                existingTopic.resource.type = resourceData.type;
-                existingTopic.resource.updatedAt = new Date();
-            } else {
-                // Create new resource
-                existingTopic.resource = {
-                    id: uuidv4(),
-                    topicId: existingTopic.id,
-                    url: resourceData.url,
-                    description: resourceData.description,
-                    type: resourceData.type,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                };
-            }
-        }
-
-        // Create a new version record
-        const newVersion = this.topicFactory.createTopicVersion(
-            id,
-            name,
-            content,
-            existingTopic.version,
-            existingTopic.resource ? { ...existingTopic.resource } : null
-        );
-        
-        // Add to versions storage
-        topicVersions.push(newVersion);
-        
-        return existingTopic;
-    }
-
-    // Add or update a resource for a topic
-    setTopicResource(
-        topicId: string,
-        url: string,
+        title: string, 
         description: string,
-        type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf'
+        resourceData?: { url: string, description: string, type: string }
     ): Topic | null {
-        const topic = this.getTopicById(topicId);
+        const topic = this.getTopicById(id);
+        
         if (!topic) {
             return null;
         }
-
-        // Create or update the resource
-        if (topic.resource) {
-            // Update existing resource
-            topic.resource.url = url;
-            topic.resource.description = description;
-            topic.resource.type = type;
-            topic.resource.updatedAt = new Date();
-        } else {
-            // Create new resource
-            topic.resource = {
-                id: uuidv4(),
-                topicId,
-                url,
-                description,
-                type,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            };
-        }
-
+        
+        // Update topic properties
+        topic.title = title;
+        topic.description = description;
         topic.updatedAt = new Date();
+        
+        // Handle resource update
+        if (resourceData) {
+            if (!topic.resource) {
+                // Create new resource
+                const resource: TopicResource = {
+                    id: uuidv4(),
+                    url: resourceData.url,
+                    description: resourceData.description,
+                    type: resourceData.type,
+                    topicId: topic.id
+                };
+                topic.setResource(resource);
+            } else {
+                // Update existing resource
+                topic.resource.url = resourceData.url;
+                topic.resource.description = resourceData.description;
+                topic.resource.type = resourceData.type;
+            }
+        }
+        
+        // Create a new version
+        const newVersion = topic.createNewVersion();
+        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
+        topicVersions.push(topicVersion);
+        
+        return topic;
+    }
+
+    // Set a resource for a topic
+    setTopicResource(
+        id: string, 
+        url: string, 
+        description: string, 
+        type: string
+    ): Topic | null {
+        const topic = this.getTopicById(id);
+        
+        if (!topic) {
+            return null;
+        }
+        
+        const resource: TopicResource = {
+            id: topic.resource?.id || uuidv4(),
+            url,
+            description,
+            type,
+            topicId: topic.id
+        };
+        
+        topic.setResource(resource);
+        
+        // Create a new version
+        const newVersion = topic.createNewVersion();
+        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
+        topicVersions.push(topicVersion);
+        
         return topic;
     }
 
     // Remove a resource from a topic
-    removeTopicResource(topicId: string): Topic | null {
-        const topic = this.getTopicById(topicId);
+    removeTopicResource(id: string): Topic | null {
+        const topic = this.getTopicById(id);
+        
         if (!topic || !topic.resource) {
             return null;
         }
-
-        // Remove the resource
-        topic.resource = null;
-        topic.updatedAt = new Date();
-
+        
+        topic.removeResource();
+        
+        // Create a new version
+        const newVersion = topic.createNewVersion();
+        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
+        topicVersions.push(topicVersion);
+        
         return topic;
     }
 
     // Delete a topic and all its versions
     deleteTopic(id: string): boolean {
-        const topicIndex = topics.findIndex(topic => topic.id === id);
-        if (topicIndex === -1) {
+        const topic = this.getTopicById(id);
+        
+        if (!topic) {
             return false;
         }
-
-        // Remove from parent's children if it has a parent
-        const topic = topics[topicIndex];
-        if (topic.parentTopicId) {
-            const parentTopic = this.getTopicById(topic.parentTopicId);
-            if (parentTopic) {
-                parentTopic.childrenTopics = parentTopic.childrenTopics.filter(
-                    child => child.id !== id
-                );
-                parentTopic.children = parentTopic.children.filter(
-                    child => child.id !== id
-                );
-            }
-        }
-
+        
+        // Remove all versions
+        topicVersions = topicVersions.filter(tv => tv.topicId !== id);
+        
+        // Remove the topic
+        topics = topics.filter(t => t.id !== id);
+        
         // Remove all child topics recursively
         this.deleteChildTopics(id);
-
-        // Remove the topic
-        topics.splice(topicIndex, 1);
-        
-        // Remove all versions of this topic
-        topicVersions = topicVersions.filter(tv => tv.topicId !== id);
         
         return true;
     }
 
-    // Helper method to recursively delete child topics
+    // Helper method to delete child topics
     private deleteChildTopics(parentId: string): void {
-        const childTopics = topics.filter(topic => topic.parentTopicId === parentId);
+        const childTopics = topics.filter(t => t.parentId === parentId);
         
         for (const childTopic of childTopics) {
-            this.deleteChildTopics(childTopic.id);
-            
-            // Remove the child topic
-            const childIndex = topics.findIndex(t => t.id === childTopic.id);
-            if (childIndex !== -1) {
-                topics.splice(childIndex, 1);
-            }
-            
-            // Remove all versions of this child topic
-            topicVersions = topicVersions.filter(tv => tv.topicId !== childTopic.id);
+            this.deleteTopic(childTopic.id);
         }
     }
 
-    // Get topic hierarchy (composite pattern)
-    getTopicHierarchy(rootTopicId: string): CompositeTopic | null {
-        const rootTopic = this.getTopicById(rootTopicId);
-        if (!rootTopic) {
+    // Get topic hierarchy using composite pattern
+    getTopicHierarchy(id: string): CompositeTopic | null {
+        const topic = this.getTopicById(id);
+        
+        if (!topic) {
             return null;
         }
-
-        return this.buildTopicHierarchy(rootTopic);
+        
+        return this.buildTopicHierarchy(topic);
     }
 
-    // Helper method to build topic hierarchy recursively
+    // Helper method to build topic hierarchy
     private buildTopicHierarchy(topic: Topic): CompositeTopic {
         const compositeTopic = new CompositeTopic(topic);
+        const childTopics = topics.filter(t => t.parentId === topic.id);
         
-        for (const childTopic of topic.childrenTopics) {
+        for (const childTopic of childTopics) {
             const childCompositeTopic = this.buildTopicHierarchy(childTopic);
-            compositeTopic.add(childCompositeTopic);
+            compositeTopic.addChild(childCompositeTopic);
         }
         
         return compositeTopic;
     }
-} 
+}
+
+// Export singleton instance
+export const topicService = new TopicService(); 

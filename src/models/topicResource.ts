@@ -4,6 +4,4 @@ export interface TopicResource {
     url: string;
     description: string;
     type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf';
-    createdAt: Date;
-    updatedAt: Date;
 }

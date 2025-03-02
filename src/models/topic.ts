@@ -17,33 +17,36 @@ export interface IHierarchical<T> {
 // Import TopicResource interface
 import { TopicResource } from './topicResource';
 
-// Topic interfaces
-export interface ITopic extends IVersionable, IHierarchical<ITopic> {
-    name: string;
-    content: string;
-    resource: TopicResource | null; // Changed from resources array to single resource
+// Base topic interface
+export interface ITopic {
+    id: string;
+    title: string;
+    description: string;
+    parentId: string | null;
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
+    resource: TopicResource | null;
+    ownerId: string;
 }
 
-// Concrete implementation
+// Topic interface with methods
 export interface Topic extends ITopic {
-    id: string; //TODO check if this is needed or we can use the id from the ITopic interface
-    name: string; //TODO check if this is needed or we can use the name from the ITopic interface
-    content: string; //TODO check if this is needed or we can use the content from the ITopic interface
-    createdAt: Date; //TODO check if this is needed or we can use the createdAt from the ITopic interface
-    updatedAt: Date; //TODO check if this is needed or we can use the updatedAt from the ITopic interface
-    version: number; //TODO check if this is needed or we can use the version from the ITopic interface
-    parentTopicId: string | null; //TODO check if this is needed or we can use the parentTopicId from the ITopic interface
-    childrenTopics: Topic[]; //TODO check if this is needed or we can use the childrenTopics from the ITopic interface
-    resource: TopicResource | null;
+    childrenTopics: Topic[];
+    createNewVersion(): Topic;
+    setResource(resource: TopicResource): void;
+    removeResource(): void;
 }
 
 // Topic version interface
-export interface TopicVersion extends IEntity {
+export interface TopicVersion extends ITopic {
     topicId: string;
-    name: string;
-    content: string;
-    version: number;
-    resource: TopicResource | null; // Changed from resources array to single resource
+}
+
+// Factory pattern for creating topics
+export interface TopicFactory {
+    createTopic(title: string, description: string, parentId: string | null, ownerId: string, resource?: TopicResource): Topic;
+    createTopicVersion(topic: Topic): TopicVersion;
 }
 
 // Abstract classes for implementing design patterns
@@ -61,12 +64,6 @@ export abstract class VersionedEntity implements IVersionable {
     }
 
     abstract createNewVersion(): VersionedEntity;
-}
-
-// Factory pattern for creating topics
-export abstract class TopicFactory {
-    abstract createTopic(name: string, content: string, parentTopicId: string | null, resource?: TopicResource | null): Topic;
-    abstract createTopicVersion(topicId: string, name: string, content: string, version: number, resource?: TopicResource | null): TopicVersion;
 }
 
 // Composite pattern for hierarchical topics

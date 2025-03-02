@@ -11,39 +11,46 @@ import {
     setTopicResource,
     removeTopicResource
 } from '../controllers/topicController';
-import { authenticate, authorizeAdmin, authorizeEditorOrAdmin, authorizeUser } from '../middleware/authMiddleware';
+import { 
+    authenticate, 
+    authorizeTopicRead,
+    authorizeTopicCreate,
+    authorizeTopicUpdate,
+    authorizeTopicDelete
+} from '../middleware/authMiddleware';
 
 const router: Router = express.Router();
 
 // Public routes - no authentication required
 // GET all topics
-router.get('/', authenticate, authorizeUser, getAllTopics);
+router.get('/', authenticate, authorizeTopicRead, getAllTopics);
 
 // GET a specific topic by ID
-router.get('/:id', authenticate, authorizeUser, getTopicById);
+router.get('/:id', authenticate, authorizeTopicRead, getTopicById);
 
 // GET all versions of a topic
-router.get('/:id/versions', authenticate, authorizeUser, getAllTopicVersions);
+router.get('/:id/versions', authenticate, authorizeTopicRead, getAllTopicVersions);
 
 // GET a specific version of a topic
-router.get('/:id/versions/:version', authenticate, authorizeUser, getTopicVersion);
+router.get('/:id/versions/:version', authenticate, authorizeTopicRead, getTopicVersion);
 
 // GET topic hierarchy
-router.get('/:id/hierarchy', authenticate, authorizeUser, getTopicHierarchy);
+router.get('/:id/hierarchy', authenticate, authorizeTopicRead, getTopicHierarchy);
 
-// POST a new topic - only admin or editor
-router.post('/', authenticate, authorizeEditorOrAdmin, createTopic);
+// Protected routes - authentication and authorization required
+// POST a new topic
+router.post('/', authenticate, authorizeTopicCreate, createTopic);
 
-// PUT/update a topic - only admin or editor
-router.put('/:id', authenticate, authorizeEditorOrAdmin, updateTopic);
+// PUT update a topic
+router.put('/:id', authenticate, authorizeTopicUpdate, updateTopic);
 
-// PUT/set resource for a topic - only admin or editor
-router.put('/:id/resource', authenticate, authorizeEditorOrAdmin, setTopicResource);
+// PUT set a resource for a topic
+router.put('/:id/resource', authenticate, authorizeTopicUpdate, setTopicResource);
 
-// DELETE resource from a topic - only admin or editor
-router.delete('/:id/resource', authenticate, authorizeEditorOrAdmin, removeTopicResource);
+// DELETE a resource from a topic
+router.delete('/:id/resource', authenticate, authorizeTopicUpdate, removeTopicResource);
 
-// DELETE a topic - only admin
-router.delete('/:id', authenticate, authorizeAdmin, deleteTopic);
+// DELETE a topic
+router.delete('/:id', authenticate, authorizeTopicDelete, deleteTopic);
 
 export default router; 

@@ -10,40 +10,52 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Concrete implementation of a versioned topic
 export class TopicImpl extends VersionedEntity implements Topic {
-    name: string;
-    content: string;
-    parentTopicId: string | null;
-    childrenTopics: Topic[];
+    id: string;
+    title: string;
+    description: string;
     parentId: string | null;
-    children: Topic[];
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
+    childrenTopics: Topic[];
     resource: TopicResource | null;
+    ownerId: string;
 
     constructor(
         id: string,
-        name: string,
-        content: string,
-        parentTopicId: string | null = null,
-        version: number = 1,
+        title: string,
+        description: string,
+        parentId: string | null,
+        version: number,
+        createdAt: Date,
+        updatedAt: Date,
+        ownerId: string,
         resource: TopicResource | null = null
     ) {
         super(id, version);
-        this.name = name;
-        this.content = content;
-        this.parentTopicId = parentTopicId;
-        this.parentId = parentTopicId; // To satisfy IHierarchical interface
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.parentId = parentId;
+        this.version = version;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.childrenTopics = [];
-        this.children = []; // To satisfy IHierarchical interface
         this.resource = resource;
+        this.ownerId = ownerId;
     }
 
-    createNewVersion(): TopicImpl {
+    createNewVersion(): Topic {
         const newTopic = new TopicImpl(
             this.id,
-            this.name,
-            this.content,
-            this.parentTopicId,
+            this.title,
+            this.description,
+            this.parentId,
             this.version + 1,
-            this.resource ? { ...this.resource } : null // Copy resource to the new version if it exists
+            this.createdAt,
+            new Date(),
+            this.ownerId,
+            this.resource
         );
         return newTopic;
     }
@@ -51,11 +63,13 @@ export class TopicImpl extends VersionedEntity implements Topic {
     // Set the resource for the topic
     setResource(resource: TopicResource): void {
         this.resource = resource;
+        this.updatedAt = new Date();
     }
 
     // Remove the resource from the topic
     removeResource(): void {
         this.resource = null;
+        this.updatedAt = new Date();
     }
 }
 
@@ -63,87 +77,89 @@ export class TopicImpl extends VersionedEntity implements Topic {
 export class TopicVersionImpl implements TopicVersion {
     id: string;
     topicId: string;
-    name: string;
-    content: string;
+    title: string;
+    description: string;
+    parentId: string | null;
     version: number;
     createdAt: Date;
     updatedAt: Date;
     resource: TopicResource | null;
+    ownerId: string;
 
     constructor(
         id: string,
         topicId: string,
-        name: string,
-        content: string,
+        title: string,
+        description: string,
+        parentId: string | null,
         version: number,
+        createdAt: Date,
+        updatedAt: Date,
+        ownerId: string,
         resource: TopicResource | null = null
     ) {
         this.id = id;
         this.topicId = topicId;
-        this.name = name;
-        this.content = content;
+        this.title = title;
+        this.description = description;
+        this.parentId = parentId;
         this.version = version;
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.resource = resource;
+        this.ownerId = ownerId;
     }
 }
 
 // Concrete implementation of the topic factory
-export class TopicFactoryImpl extends TopicFactory {
+export class TopicFactoryImpl implements TopicFactory {
     createTopic(
-        name: string, 
-        content: string, 
-        parentTopicId: string | null,
-        resource: TopicResource | null = null
+        title: string,
+        description: string,
+        parentId: string | null,
+        ownerId: string,
+        resource?: TopicResource
     ): Topic {
-        const id = uuidv4();
-        return new TopicImpl(id, name, content, parentTopicId, 1, resource);
+        return new TopicImpl(
+            uuidv4(),
+            title,
+            description,
+            parentId,
+            1,
+            new Date(),
+            new Date(),
+            ownerId,
+            resource || null
+        );
     }
 
-    createTopicVersion(
-        topicId: string, 
-        name: string, 
-        content: string, 
-        version: number,
-        resource: TopicResource | null = null
-    ): TopicVersion {
-        const id = uuidv4();
-        return new TopicVersionImpl(id, topicId, name, content, version, resource);
+    createTopicVersion(topic: Topic): TopicVersion {
+        return new TopicVersionImpl(
+            uuidv4(),
+            topic.id,
+            topic.title,
+            topic.description,
+            topic.parentId,
+            topic.version,
+            topic.createdAt,
+            topic.updatedAt,
+            topic.ownerId,
+            topic.resource
+        );
     }
 }
 
-// Concrete implementation of the composite pattern for topics
-export class CompositeTopic extends CompositeTopicComponent {
-    private topic: Topic;
-    private children: CompositeTopicComponent[];
+// Composite pattern for topic hierarchy
+export class CompositeTopic {
+    topic: Topic;
+    children: CompositeTopic[];
 
     constructor(topic: Topic) {
-        super(topic.id);
         this.topic = topic;
         this.children = [];
     }
 
-    add(component: CompositeTopicComponent): void {
-        this.children.push(component);
-    }
-
-    remove(componentId: string): void {
-        const index = this.children.findIndex(child => child.id === componentId);
-        if (index !== -1) {
-            this.children.splice(index, 1);
-        }
-    }
-
-    getChild(componentId: string): CompositeTopicComponent | null {
-        return this.children.find(child => child.id === componentId) || null;
-    }
-
-    getChildren(): CompositeTopicComponent[] {
-        return [...this.children];
-    }
-
-    getTopic(): Topic {
-        return this.topic;
+    addChild(child: CompositeTopic): void {
+        this.children.push(child);
     }
 } 
