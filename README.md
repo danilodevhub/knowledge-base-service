@@ -62,7 +62,17 @@ npm run build
 npm start
 ```
 
+## Authentication
+
+This service uses role-based access control:
+- Admin users can perform all operations
+- Editor users can create and edit content
+- Viewer users can only view content
+
 ## API Endpoints
+
+### Authentication
+- POST /auth/login - Authenticate a user and get a token
 
 ### Topics
 
@@ -74,6 +84,10 @@ npm start
 - `POST /knowledge-base/topics` - Create a new topic
 - `PUT /knowledge-base/topics/:id` - Update a topic (creates a new version)
 - `DELETE /knowledge-base/topics/:id` - Delete a topic and all its versions
+
+### Topic Resources
+- PUT /knowledge-base/topics/:id/resource - Set a resource for a topic (requires admin or editor role)
+- DELETE /knowledge-base/topics/:id/resource - Remove a resource from a topic (requires admin or editor role)
 
 ### Health Check
 
