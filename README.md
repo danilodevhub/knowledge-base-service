@@ -179,6 +179,21 @@ Valid resource types:
 - image
 - pdf
 
+## Testing with Postman
+
+### Setup
+
+1. Download the Postman collection:
+   ```
+   /postman/Knowledge-Base-Service.postman_collection.json
+   ```
+
+2. Import the collection into Postman:
+   - Open Postman
+   - Click "Import" button
+   - Choose the downloaded collection file
+   - Select the imported "Knowledge Base Service" collection
+
 ## License
 
 MIT
