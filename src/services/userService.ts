@@ -1,36 +1,22 @@
 import { User } from '../models/user';
-import fs from 'fs';
-import path from 'path';
-
-// Path to the users JSON file
-const usersFilePath = path.join(__dirname, '../../src/storage/users-table.json');
+import { IDao } from '../dao/IDao';
+import { DaoFactory } from '../dao/daoFactory';
 
 export class UserService {
-  private users: User[] = [];
+  private userDao: IDao<User>;
 
   constructor() {
-    this.loadUsers();
-  }
-
-  // Load users from JSON file
-  private loadUsers(): void {
-    try {
-      const data = fs.readFileSync(usersFilePath, 'utf8');
-      this.users = JSON.parse(data);
-    } catch (error) {
-      console.error('Error loading users:', error);
-      this.users = [];
-    }
+    this.userDao = DaoFactory.createJsonFileDao<User>('users.json');
   }
 
   // Get user by ID
   getUserById(id: string): User | null {
-    return this.users.find(user => user.id === id) || null;
+    return this.userDao.findById(id);
   }
 
   // Get user by email
   getUserByEmail(email: string): User | null {
-    return this.users.find(user => user.email === email) || null;
+    return this.userDao.findBy(user => user.email === email);
   }
 
   // Check if user has admin role

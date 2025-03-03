@@ -1,38 +1,71 @@
 import { Topic, TopicVersion } from '../models/topic';
 import { TopicImpl, TopicVersionImpl, TopicFactoryImpl, CompositeTopic } from '../models/topicImpl';
 import { TopicResource } from '../models/topicResource';
-import { StorageService } from './storageService';
+import { IDao } from '../dao/IDao';
+import { DaoFactory } from '../dao/daoFactory';
 import { v4 as uuidv4 } from 'uuid';
 
 export class TopicService {
     private topicFactory: TopicFactoryImpl;
-    private topicStorage: StorageService<Topic>;
-    private versionStorage: StorageService<TopicVersion>;
+    private topicDao: IDao<Topic>;
+    private versionDao: IDao<TopicVersion>;
 
     constructor() {
         this.topicFactory = new TopicFactoryImpl();
-        this.topicStorage = new StorageService<Topic>('topics.json');
-        this.versionStorage = new StorageService<TopicVersion>('topic-versions.json');
+        this.topicDao = DaoFactory.createJsonFileDao<Topic>('topics.json');
+        this.versionDao = DaoFactory.createJsonFileDao<TopicVersion>('topic-versions.json');
     }
 
     // Get all topics (latest versions)
     getAllTopics(): Topic[] {
-        return this.topicStorage.readData();
+        const topics = this.topicDao.findAll();
+        return topics.map(topic => this.convertToTopicImpl(topic));
     }
 
     // Get a specific topic by ID (latest version)
     getTopicById(id: string): Topic | null {
-        return this.topicStorage.findOne(topic => topic.id === id);
+        const topicData = this.topicDao.findById(id);
+        if (!topicData) {
+            return null;
+        }
+        return this.convertToTopicImpl(topicData);
     }
 
     // Get a specific version of a topic
     getTopicVersion(id: string, version: number): TopicVersion | null {
-        return this.versionStorage.findOne(tv => tv.topicId === id && tv.version === version);
+        const versionData = this.versionDao.findBy(tv => tv.topicId === id && tv.version === version);
+        if (!versionData) {
+            return null;
+        }
+        return new TopicVersionImpl(
+            versionData.id,
+            versionData.topicId,
+            versionData.name,
+            versionData.content,
+            versionData.parentTopicId,
+            versionData.version,
+            new Date(versionData.createdAt),
+            new Date(versionData.updatedAt),
+            versionData.ownerId,
+            versionData.resource
+        );
     }
 
     // Get all versions of a topic
     getAllTopicVersions(id: string): TopicVersion[] {
-        return this.versionStorage.findMany(tv => tv.topicId === id);
+        const versions = this.versionDao.findManyBy(tv => tv.topicId === id);
+        return versions.map(version => new TopicVersionImpl(
+            version.id,
+            version.topicId,
+            version.name,
+            version.content,
+            version.parentTopicId,
+            version.version,
+            new Date(version.createdAt),
+            new Date(version.updatedAt),
+            version.ownerId,
+            version.resource
+        ));
     }
 
     // Create a new topic
@@ -69,11 +102,11 @@ export class TopicService {
         }
         
         // Store the topic
-        this.topicStorage.appendData(topic);
+        this.topicDao.create(topic);
         
         // Create initial version
         const topicVersion = this.topicFactory.createTopicVersion(topic);
-        this.versionStorage.appendData(topicVersion);
+        this.versionDao.create(topicVersion);
         
         return topic;
     }
@@ -99,6 +132,7 @@ export class TopicService {
         topic.name = name;
         topic.content = content;
         topic.updatedAt = new Date();
+        topic.version += 1; // Increment version number
         
         // Handle resource update
         if (resourceData) {
@@ -121,12 +155,11 @@ export class TopicService {
         }
         
         // Update the topic in storage
-        this.topicStorage.updateData(t => t.id === id, topic);
+        this.topicDao.update(t => t.id === id, topic);
         
-        // Create a new version
-        const newVersion = topic.createNewVersion();
-        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        this.versionStorage.appendData(topicVersion);
+        // Create a new version with the same version number
+        const topicVersion = this.topicFactory.createTopicVersion(topic);
+        this.versionDao.create(topicVersion);
         
         return topic;
     }
@@ -153,14 +186,15 @@ export class TopicService {
         };
         
         topic.setResource(resource);
+        topic.version += 1; // Increment version number
+        topic.updatedAt = new Date();
         
         // Update the topic in storage
-        this.topicStorage.updateData(t => t.id === id, topic);
+        this.topicDao.update(t => t.id === id, topic);
         
-        // Create a new version
-        const newVersion = topic.createNewVersion();
-        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        this.versionStorage.appendData(topicVersion);
+        // Create a new version with the same version number
+        const topicVersion = this.topicFactory.createTopicVersion(topic);
+        this.versionDao.create(topicVersion);
         
         return topic;
     }
@@ -174,14 +208,15 @@ export class TopicService {
         }
         
         topic.removeResource();
+        topic.version += 1; // Increment version number
+        topic.updatedAt = new Date();
         
         // Update the topic in storage
-        this.topicStorage.updateData(t => t.id === id, topic);
+        this.topicDao.update(t => t.id === id, topic);
         
-        // Create a new version
-        const newVersion = topic.createNewVersion();
-        const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        this.versionStorage.appendData(topicVersion);
+        // Create a new version with the same version number
+        const topicVersion = this.topicFactory.createTopicVersion(topic);
+        this.versionDao.create(topicVersion);
         
         return topic;
     }
@@ -195,10 +230,10 @@ export class TopicService {
         }
         
         // Remove all versions
-        this.versionStorage.deleteData(tv => tv.topicId === id);
+        this.versionDao.delete(tv => tv.topicId === id);
         
         // Remove the topic
-        this.topicStorage.deleteData(t => t.id === id);
+        this.topicDao.delete(t => t.id === id);
         
         // Remove all child topics recursively
         this.deleteChildTopics(id);
@@ -208,7 +243,7 @@ export class TopicService {
 
     // Helper method to delete child topics
     private deleteChildTopics(parentTopicId: string): void {
-        const childTopics = this.topicStorage.findMany(t => t.parentTopicId === parentTopicId);
+        const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === parentTopicId);
         
         for (const childTopic of childTopics) {
             this.deleteTopic(childTopic.id);
@@ -229,7 +264,8 @@ export class TopicService {
     // Helper method to build topic hierarchy
     private buildTopicHierarchy(topic: Topic): CompositeTopic {
         const compositeTopic = new CompositeTopic(topic);
-        const childTopics = this.topicStorage.findMany(t => t.parentTopicId === topic.id);
+        const childTopicsData = this.topicDao.findManyBy(t => t.parentTopicId === topic.id);
+        const childTopics = childTopicsData.map(childData => this.convertToTopicImpl(childData));
         
         for (const childTopic of childTopics) {
             const childCompositeTopic = this.buildTopicHierarchy(childTopic);
@@ -237,6 +273,21 @@ export class TopicService {
         }
         
         return compositeTopic;
+    }
+
+    // Helper method to convert plain object to TopicImpl instance
+    private convertToTopicImpl(topicData: any): TopicImpl {
+        return new TopicImpl(
+            topicData.id,
+            topicData.name,
+            topicData.content,
+            topicData.parentTopicId,
+            topicData.version,
+            new Date(topicData.createdAt),
+            new Date(topicData.updatedAt),
+            topicData.ownerId,
+            topicData.resource
+        );
     }
 }
 
