@@ -11,21 +11,20 @@ import { v4 as uuidv4 } from 'uuid';
 // Concrete implementation of a versioned topic
 export class TopicImpl extends VersionedEntity implements Topic {
     id: string;
-    title: string;
-    description: string;
-    parentId: string | null;
+    name: string;
+    content: string;
+    parentTopicId: string | null;
     version: number;
     createdAt: Date;
-    updatedAt: Date;
-    childrenTopics: Topic[];
+    updatedAt: Date;    
     resource: TopicResource | null;
     ownerId: string;
 
     constructor(
         id: string,
-        title: string,
-        description: string,
-        parentId: string | null,
+        name: string,
+        content: string,
+        parentTopicId: string | null,
         version: number,
         createdAt: Date,
         updatedAt: Date,
@@ -34,13 +33,12 @@ export class TopicImpl extends VersionedEntity implements Topic {
     ) {
         super(id, version);
         this.id = id;
-        this.title = title;
-        this.description = description;
-        this.parentId = parentId;
+        this.name = name;
+        this.content = content;
+        this.parentTopicId = parentTopicId;
         this.version = version;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.childrenTopics = [];
+        this.updatedAt = updatedAt;        
         this.resource = resource;
         this.ownerId = ownerId;
     }
@@ -48,9 +46,9 @@ export class TopicImpl extends VersionedEntity implements Topic {
     createNewVersion(): Topic {
         const newTopic = new TopicImpl(
             this.id,
-            this.title,
-            this.description,
-            this.parentId,
+            this.name,
+            this.content,
+            this.parentTopicId,
             this.version + 1,
             this.createdAt,
             new Date(),
@@ -77,9 +75,9 @@ export class TopicImpl extends VersionedEntity implements Topic {
 export class TopicVersionImpl implements TopicVersion {
     id: string;
     topicId: string;
-    title: string;
-    description: string;
-    parentId: string | null;
+    name: string;
+    content: string;
+    parentTopicId: string | null;
     version: number;
     createdAt: Date;
     updatedAt: Date;
@@ -89,9 +87,9 @@ export class TopicVersionImpl implements TopicVersion {
     constructor(
         id: string,
         topicId: string,
-        title: string,
-        description: string,
-        parentId: string | null,
+        name: string,
+        content: string,
+        parentTopicId: string | null,
         version: number,
         createdAt: Date,
         updatedAt: Date,
@@ -100,9 +98,9 @@ export class TopicVersionImpl implements TopicVersion {
     ) {
         this.id = id;
         this.topicId = topicId;
-        this.title = title;
-        this.description = description;
-        this.parentId = parentId;
+        this.name = name;
+        this.content = content;
+        this.parentTopicId = parentTopicId;
         this.version = version;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -114,17 +112,17 @@ export class TopicVersionImpl implements TopicVersion {
 // Concrete implementation of the topic factory
 export class TopicFactoryImpl implements TopicFactory {
     createTopic(
-        title: string,
-        description: string,
-        parentId: string | null,
+        name: string,
+        content: string,
+        parentTopicId: string | null,
         ownerId: string,
         resource?: TopicResource
     ): Topic {
         return new TopicImpl(
             uuidv4(),
-            title,
-            description,
-            parentId,
+            name,
+            content,
+            parentTopicId,
             1,
             new Date(),
             new Date(),
@@ -137,9 +135,9 @@ export class TopicFactoryImpl implements TopicFactory {
         return new TopicVersionImpl(
             uuidv4(),
             topic.id,
-            topic.title,
-            topic.description,
-            topic.parentId,
+            topic.name,
+            topic.content,
+            topic.parentTopicId,
             topic.version,
             topic.createdAt,
             topic.updatedAt,

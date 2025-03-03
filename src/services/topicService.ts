@@ -1,46 +1,51 @@
 import { Topic, TopicVersion } from '../models/topic';
 import { TopicImpl, TopicVersionImpl, TopicFactoryImpl, CompositeTopic } from '../models/topicImpl';
 import { TopicResource } from '../models/topicResource';
+import { StorageService } from './storageService';
 import { v4 as uuidv4 } from 'uuid';
-
-// In-memory storage (replace with database in production)
-let topics: Topic[] = [];
-let topicVersions: TopicVersion[] = [];
 
 export class TopicService {
     private topicFactory: TopicFactoryImpl;
+    private topicStorage: StorageService<Topic>;
+    private versionStorage: StorageService<TopicVersion>;
 
     constructor() {
         this.topicFactory = new TopicFactoryImpl();
+        this.topicStorage = new StorageService<Topic>('topics.json');
+        this.versionStorage = new StorageService<TopicVersion>('topic-versions.json');
     }
 
     // Get all topics (latest versions)
     getAllTopics(): Topic[] {
-        return topics;
+        return this.topicStorage.readData();
     }
 
     // Get a specific topic by ID (latest version)
     getTopicById(id: string): Topic | null {
-        return topics.find(topic => topic.id === id) || null;
+        return this.topicStorage.findOne(topic => topic.id === id);
     }
 
     // Get a specific version of a topic
     getTopicVersion(id: string, version: number): TopicVersion | null {
-        return topicVersions.find(tv => tv.topicId === id && tv.version === version) || null;
+        return this.versionStorage.findOne(tv => tv.topicId === id && tv.version === version);
     }
 
     // Get all versions of a topic
     getAllTopicVersions(id: string): TopicVersion[] {
-        return topicVersions.filter(tv => tv.topicId === id);
+        return this.versionStorage.findMany(tv => tv.topicId === id);
     }
 
     // Create a new topic
     createTopic(
-        title: string, 
-        description: string, 
-        parentId: string | null,
+        name: string, 
+        content: string, 
+        parentTopicId: string | null,
         ownerId: string,
-        resourceData?: { url: string, description: string, type: string }
+        resourceData?: { 
+            url: string, 
+            description: string, 
+            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf' 
+        }
     ): Topic {
         // Create resource if data is provided
         let resource: TopicResource | undefined = undefined;
@@ -56,7 +61,7 @@ export class TopicService {
         }
         
         // Create the topic
-        const topic = this.topicFactory.createTopic(title, description, parentId, ownerId, resource);
+        const topic = this.topicFactory.createTopic(name, content, parentTopicId, ownerId, resource);
         
         // Set the topicId on the resource if it exists
         if (resource) {
@@ -64,11 +69,11 @@ export class TopicService {
         }
         
         // Store the topic
-        topics.push(topic);
+        this.topicStorage.appendData(topic);
         
         // Create initial version
         const topicVersion = this.topicFactory.createTopicVersion(topic);
-        topicVersions.push(topicVersion);
+        this.versionStorage.appendData(topicVersion);
         
         return topic;
     }
@@ -76,9 +81,13 @@ export class TopicService {
     // Update a topic (creates a new version)
     updateTopic(
         id: string, 
-        title: string, 
-        description: string,
-        resourceData?: { url: string, description: string, type: string }
+        name: string, 
+        content: string,
+        resourceData?: { 
+            url: string, 
+            description: string, 
+            type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf' 
+        }
     ): Topic | null {
         const topic = this.getTopicById(id);
         
@@ -87,8 +96,8 @@ export class TopicService {
         }
         
         // Update topic properties
-        topic.title = title;
-        topic.description = description;
+        topic.name = name;
+        topic.content = content;
         topic.updatedAt = new Date();
         
         // Handle resource update
@@ -111,10 +120,13 @@ export class TopicService {
             }
         }
         
+        // Update the topic in storage
+        this.topicStorage.updateData(t => t.id === id, topic);
+        
         // Create a new version
         const newVersion = topic.createNewVersion();
         const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        topicVersions.push(topicVersion);
+        this.versionStorage.appendData(topicVersion);
         
         return topic;
     }
@@ -124,7 +136,7 @@ export class TopicService {
         id: string, 
         url: string, 
         description: string, 
-        type: string
+        type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf'
     ): Topic | null {
         const topic = this.getTopicById(id);
         
@@ -142,10 +154,13 @@ export class TopicService {
         
         topic.setResource(resource);
         
+        // Update the topic in storage
+        this.topicStorage.updateData(t => t.id === id, topic);
+        
         // Create a new version
         const newVersion = topic.createNewVersion();
         const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        topicVersions.push(topicVersion);
+        this.versionStorage.appendData(topicVersion);
         
         return topic;
     }
@@ -160,10 +175,13 @@ export class TopicService {
         
         topic.removeResource();
         
+        // Update the topic in storage
+        this.topicStorage.updateData(t => t.id === id, topic);
+        
         // Create a new version
         const newVersion = topic.createNewVersion();
         const topicVersion = this.topicFactory.createTopicVersion(newVersion);
-        topicVersions.push(topicVersion);
+        this.versionStorage.appendData(topicVersion);
         
         return topic;
     }
@@ -177,10 +195,10 @@ export class TopicService {
         }
         
         // Remove all versions
-        topicVersions = topicVersions.filter(tv => tv.topicId !== id);
+        this.versionStorage.deleteData(tv => tv.topicId === id);
         
         // Remove the topic
-        topics = topics.filter(t => t.id !== id);
+        this.topicStorage.deleteData(t => t.id === id);
         
         // Remove all child topics recursively
         this.deleteChildTopics(id);
@@ -189,8 +207,8 @@ export class TopicService {
     }
 
     // Helper method to delete child topics
-    private deleteChildTopics(parentId: string): void {
-        const childTopics = topics.filter(t => t.parentId === parentId);
+    private deleteChildTopics(parentTopicId: string): void {
+        const childTopics = this.topicStorage.findMany(t => t.parentTopicId === parentTopicId);
         
         for (const childTopic of childTopics) {
             this.deleteTopic(childTopic.id);
@@ -211,7 +229,7 @@ export class TopicService {
     // Helper method to build topic hierarchy
     private buildTopicHierarchy(topic: Topic): CompositeTopic {
         const compositeTopic = new CompositeTopic(topic);
-        const childTopics = topics.filter(t => t.parentId === topic.id);
+        const childTopics = this.topicStorage.findMany(t => t.parentTopicId === topic.id);
         
         for (const childTopic of childTopics) {
             const childCompositeTopic = this.buildTopicHierarchy(childTopic);

@@ -115,8 +115,7 @@ Content-Type: application/json
   "id": "123e4567-e89b-12d3-a456-426614174000",
   "name": "Introduction to TypeScript",
   "content": "TypeScript is a strongly typed programming language that builds on JavaScript...",
-  "parentTopicId": null,
-  "childrenTopics": [],
+  "parentTopicId": null,  
   "version": 1,
   "createdAt": "2023-08-27T12:00:00.000Z",
   "updatedAt": "2023-08-27T12:00:00.000Z"
@@ -143,7 +142,6 @@ Content-Type: application/json
   "name": "Introduction to TypeScript",
   "content": "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale...",
   "parentTopicId": null,
-  "childrenTopics": [],
   "version": 2,
   "createdAt": "2023-08-27T12:00:00.000Z",
   "updatedAt": "2023-08-27T12:30:00.000Z"

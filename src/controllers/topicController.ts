@@ -74,11 +74,11 @@ export const getAllTopicVersions = (req: AuthRequest, res: Response, next: NextF
 // POST a new topic
 export const createTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
-    const { title, description, parentId, resource } = req.body;
+    const { name, content, parentTopicId, resource } = req.body;
     
     // Validate required fields
-    if (!title || !description) {
-      res.status(400).json({ message: 'Title and description are required' });
+    if (!name || !content) {
+      res.status(400).json({ message: 'Name and content are required' });
       return;
     }
     
@@ -110,9 +110,9 @@ export const createTopic = (req: AuthRequest, res: Response, next: NextFunction)
     
     // Create the topic with the user as owner
     const topic = topicService.createTopic(
-      title, 
-      description, 
-      parentId || null,
+      name, 
+      content, 
+      parentTopicId || null,
       userId,
       resource
     );
@@ -127,11 +127,11 @@ export const createTopic = (req: AuthRequest, res: Response, next: NextFunction)
 export const updateTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
     const id = req.params.id;
-    const { title, description, resource } = req.body;
+    const { name, content, resource } = req.body;
     
     // Validate required fields
-    if (!title || !description) {
-      res.status(400).json({ message: 'Title and description are required' });
+    if (!name || !content) {
+      res.status(400).json({ message: 'Name and content are required' });
       return;
     }
     
@@ -181,7 +181,7 @@ export const updateTopic = (req: AuthRequest, res: Response, next: NextFunction)
     console.log(`Topic updated by user: ${userId} (${req.user?.role})`);
     
     // Update the topic
-    const updatedTopic = topicService.updateTopic(id, title, description, resource);
+    const updatedTopic = topicService.updateTopic(id, name, content, resource);
     
     if (!updatedTopic) {
       res.status(404).json({ message: 'Topic not found' });

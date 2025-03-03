@@ -1,0 +1,62 @@
+[
+  {
+    "id": "a0e3f385-3d7d-477e-bbaa-fc1629f96813",
+    "topicId": "67c27eed-bc70-4a9e-8c39-801323b3bc7c",
+    "name": "Introduction about Soccer",
+    "content": "Soccer, known as football in many countries, is the world's most popular sport. Played by two teams of eleven, it involves scoring goals by getting a ball into the opponent's net. With rich history and global appeal, it unites millions of fans worldwide.",
+    "parentTopicId": null,
+    "version": 1,
+    "createdAt": "2025-03-03T18:59:32.528Z",
+    "updatedAt": "2025-03-03T18:59:32.528Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "14202104-afde-439f-b616-d9157a283ae3",
+    "topicId": "7a8703a2-aa19-42d7-8926-b18eca7e099c",
+    "name": "History and Origins of Soccer",
+    "content": "Soccer's origins date back over 2,000 years to ancient China, Greece, and Rome, where similar ball games were played. Modern soccer emerged in England in the 19th century, with standardized rules established in 1863, leading to its worldwide popularity today.",
+    "parentTopicId": "67c27eed-bc70-4a9e-8c39-801323b3bc7c",
+    "version": 1,
+    "createdAt": "2025-03-03T19:01:41.059Z",
+    "updatedAt": "2025-03-03T19:01:41.059Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "5725b799-723f-4aee-9876-07b603bed176",
+    "topicId": "c8278c6b-a2b1-4ca3-a3f5-ea6fcdff97fb",
+    "name": "Soccer Championships",
+    "content": "Soccer championships are competitive tournaments that showcase the best teams and players in the sport. They can be international or domestic and vary in format and prestige. These championships play a crucial role in the sport's culture, uniting fans and celebrating athletic excellence.",
+    "parentTopicId": "67c27eed-bc70-4a9e-8c39-801323b3bc7c",
+    "version": 1,
+    "createdAt": "2025-03-03T19:06:24.631Z",
+    "updatedAt": "2025-03-03T19:06:24.631Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "48857408-6399-45fc-8d2b-fb1219cad0ee",
+    "topicId": "92ed4af0-ecb6-4077-aad8-3ce60db74d25",
+    "name": "Major Soccer Championships",
+    "content": "The most famous championships include the UEFA Champions League, known for top European club competition, and domestic leagues like the English Premier League, La Liga in Spain, and Serie A in Italy. These tournaments highlight elite talent and fierce rivalries, captivating fans worldwide.",
+    "parentTopicId": "c8278c6b-a2b1-4ca3-a3f5-ea6fcdff97fb",
+    "version": 1,
+    "createdAt": "2025-03-03T19:07:20.072Z",
+    "updatedAt": "2025-03-03T19:07:20.072Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "ecc00d95-d682-40ae-9f7e-e6a8907bc439",
+    "topicId": "b98980e4-ab1a-41a2-b48f-c25b8aff17b7",
+    "name": "FIFA World Cup",
+    "content": "The FIFA World Cup is the most prestigious soccer tournament, held every four years since 1930, except in 1942 and 1946. It features national teams from around the globe competing for the title, showcasing the sport's passion and talent on the world stage.",
+    "parentTopicId": "c8278c6b-a2b1-4ca3-a3f5-ea6fcdff97fb",
+    "version": 1,
+    "createdAt": "2025-03-03T19:07:47.314Z",
+    "updatedAt": "2025-03-03T19:07:47.314Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  }
+]

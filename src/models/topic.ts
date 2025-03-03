@@ -20,9 +20,9 @@ import { TopicResource } from './topicResource';
 // Base topic interface
 export interface ITopic {
     id: string;
-    title: string;
-    description: string;
-    parentId: string | null;
+    name: string;
+    content: string;
+    parentTopicId: string | null;
     version: number;
     createdAt: Date;
     updatedAt: Date;
@@ -32,7 +32,6 @@ export interface ITopic {
 
 // Topic interface with methods
 export interface Topic extends ITopic {
-    childrenTopics: Topic[];
     createNewVersion(): Topic;
     setResource(resource: TopicResource): void;
     removeResource(): void;
@@ -45,7 +44,7 @@ export interface TopicVersion extends ITopic {
 
 // Factory pattern for creating topics
 export interface TopicFactory {
-    createTopic(title: string, description: string, parentId: string | null, ownerId: string, resource?: TopicResource): Topic;
+    createTopic(name: string, content: string, parentTopicId: string | null, ownerId: string, resource?: TopicResource): Topic;
     createTopicVersion(topic: Topic): TopicVersion;
 }
 
