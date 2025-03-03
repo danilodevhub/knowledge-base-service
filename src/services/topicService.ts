@@ -5,6 +5,11 @@ import { IDao } from '../dao/IDao';
 import { DaoFactory } from '../dao/daoFactory';
 import { v4 as uuidv4 } from 'uuid';
 
+// Simple error logger
+const logError = (operation: string, error: any, context?: any) => {
+    console.error(`[TopicService] Error during ${operation}:`, error.message, context ? `\nContext: ${JSON.stringify(context)}` : '');
+};
+
 export class TopicService {
     private topicFactory: TopicFactoryImpl;
     private topicDao: IDao<Topic>;
@@ -223,25 +228,24 @@ export class TopicService {
 
     // Delete a topic and all its versions
     deleteTopic(id: string, options: { cascade?: boolean } = {}): { success: boolean; error?: string } {
-        const topic = this.getTopicById(id);
-        
-        if (!topic) {
-            return { success: false, error: 'Topic not found' };
-        }
-
-        // Check for child topics
-        const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === id);
-        
-        if (childTopics.length > 0 && !options.cascade) {
-            return {
-                success: false,
-                error: `Cannot delete topic with ${childTopics.length} child topics. Use cascade=true to delete all children.`
-            };
-        }
-
         try {
+            const topic = this.getTopicById(id);
+            
+            if (!topic) {
+                return { success: false, error: 'Topic not found' };
+            }
+
+            // Check for child topics
+            const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === id);
+            
+            if (childTopics.length > 0 && !options.cascade) {
+                return {
+                    success: false,
+                    error: `Cannot delete topic with ${childTopics.length} child topics. Use cascade=true to delete all children.`
+                };
+            }
+
             if (options.cascade) {
-                // Remove all child topics recursively
                 this.deleteChildTopics(id);
             }
 
@@ -253,6 +257,7 @@ export class TopicService {
             
             return { success: true };
         } catch (error: any) {
+            logError('deleteTopic', error, { topicId: id, cascade: options.cascade });
             return { 
                 success: false, 
                 error: `Failed to delete topic: ${error.message}` 
@@ -262,10 +267,14 @@ export class TopicService {
 
     // Helper method to delete child topics
     private deleteChildTopics(parentTopicId: string): void {
-        const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === parentTopicId);
-        
-        for (const childTopic of childTopics) {
-            this.deleteTopic(childTopic.id);
+        try {
+            const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === parentTopicId);
+            for (const childTopic of childTopics) {
+                this.deleteTopic(childTopic.id, { cascade: true });
+            }
+        } catch (error: any) {
+            logError('deleteChildTopics', error, { parentTopicId });
+            throw error; // Re-throw to be handled by the parent method
         }
     }
 

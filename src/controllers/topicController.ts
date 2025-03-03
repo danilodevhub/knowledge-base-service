@@ -5,6 +5,11 @@ import { Response } from 'express';
 import { ResourceType, Action } from '../models/permission';
 import { permissionService } from '../services/permissionService';
 
+// Simple error logger
+const logError = (operation: string, error: any, context?: any) => {
+    console.error(`[TopicController] Error during ${operation}:`, error.message, context ? `\nContext: ${JSON.stringify(context)}` : '');
+};
+
 // Initialize the topic service
 const topicService = new TopicService();
 
@@ -313,27 +318,31 @@ export const removeTopicResource = (req: AuthRequest, res: Response, next: NextF
 
 // DELETE a topic
 export const deleteTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  try {
-    const { id } = req.params;
-    const cascade = req.query.cascade === 'true';
-    
-    const result = topicService.deleteTopic(id, { cascade });
-    
-    if (!result.success) {
-      if (result.error?.includes('not found')) {
-        res.status(404).json({ error: result.error });
-      } else if (result.error?.includes('child topics')) {
-        res.status(409).json({ error: result.error });
-      } else {
-        res.status(500).json({ error: result.error });
-      }
-      return;
+    try {
+        const { id } = req.params;
+        const cascade = req.query.cascade === 'true';
+        
+        const result = topicService.deleteTopic(id, { cascade });
+        
+        if (!result.success) {
+            if (result.error?.includes('not found')) {
+                res.status(404).json({ error: result.error });
+            } else if (result.error?.includes('child topics')) {
+                res.status(409).json({ error: result.error });
+            } else {
+                res.status(500).json({ error: result.error });
+            }
+            return;
+        }
+        
+        res.status(204).send();
+    } catch (error: any) {
+        logError('deleteTopic', error, { 
+            topicId: req.params.id,
+            userId: req.user?.id
+        });
+        next(error);
     }
-    
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
 };
 
 // GET topic hierarchy
