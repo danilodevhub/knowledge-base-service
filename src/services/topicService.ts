@@ -10,6 +10,12 @@ const logError = (operation: string, error: any, context?: any) => {
     console.error(`[TopicService] Error during ${operation}:`, error.message, context ? `\nContext: ${JSON.stringify(context)}` : '');
 };
 
+interface PathNode {
+    topic: Topic;
+    distance: number;
+    path: Topic[];
+}
+
 export class TopicService {
     private topicFactory: TopicFactoryImpl;
     private topicDao: IDao<Topic>;
@@ -316,6 +322,125 @@ export class TopicService {
             topicData.ownerId,
             topicData.resource
         );
+    }
+
+    // Find shortest path between two topics
+    findShortestPath(fromTopicId: string, toTopicId: string): { path: Topic[]; distance: number } | null {
+        try {
+            const fromTopic = this.getTopicById(fromTopicId);
+            const toTopic = this.getTopicById(toTopicId);
+
+            if (!fromTopic || !toTopic) {
+                return null;
+            }
+
+            // If same topic, return path with just that topic
+            if (fromTopicId === toTopicId) {
+                return { path: [fromTopic], distance: 0 };
+            }
+
+            const visited = new Set<string>();
+            const queue: PathNode[] = [{
+                topic: fromTopic,
+                distance: 0,
+                path: [fromTopic]
+            }];
+
+            while (queue.length > 0) {
+                // Get the next node to explore
+                const current = queue.shift()!;
+                const currentId = current.topic.id;
+
+                if (visited.has(currentId)) {
+                    continue;
+                }
+                visited.add(currentId);
+
+                // Check parent path
+                if (current.topic.parentTopicId) {
+                    const parent = this.getTopicById(current.topic.parentTopicId);
+                    if (parent && !visited.has(parent.id)) {
+                        const parentPath = [...current.path, parent];
+                        if (parent.id === toTopicId) {
+                            return { path: parentPath, distance: current.distance + 1 };
+                        }
+                        queue.push({
+                            topic: parent,
+                            distance: current.distance + 1,
+                            path: parentPath
+                        });
+                    }
+                }
+
+                // Check children paths
+                const children = this.topicDao.findManyBy(t => t.parentTopicId === currentId);
+                for (const child of children) {
+                    if (!visited.has(child.id)) {
+                        const childTopic = this.convertToTopicImpl(child);
+                        const childPath = [...current.path, childTopic];
+                        if (child.id === toTopicId) {
+                            return { path: childPath, distance: current.distance + 1 };
+                        }
+                        queue.push({
+                            topic: childTopic,
+                            distance: current.distance + 1,
+                            path: childPath
+                        });
+                    }
+                }
+            }
+
+            // No path found
+            return null;
+        } catch (error: any) {
+            logError('findShortestPath', error, { fromTopicId, toTopicId });
+            return null;
+        }
+    }
+
+    // Find the lowest common ancestor of two topics
+    findLowestCommonAncestor(topicId1: string, topicId2: string): Topic | null {
+        try {
+            const topic1 = this.getTopicById(topicId1);
+            const topic2 = this.getTopicById(topicId2);
+
+            if (!topic1 || !topic2) {
+                return null;
+            }
+
+            // Get path to root for first topic
+            const path1 = this.getPathToRoot(topic1);
+            const ancestors1 = new Set(path1.map(t => t.id));
+
+            // Check each ancestor of second topic against first topic's path
+            let current: Topic | null = topic2;
+            while (current) {
+                if (ancestors1.has(current.id)) {
+                    return current;
+                }
+                current = current.parentTopicId ? this.getTopicById(current.parentTopicId) : null;
+            }
+
+            return null;
+        } catch (error: any) {
+            logError('findLowestCommonAncestor', error, { topicId1, topicId2 });
+            return null;
+        }
+    }
+
+    // Helper method to get path from topic to root
+    private getPathToRoot(topic: Topic): Topic[] {
+        const path: Topic[] = [topic];
+        let current: Topic | null = topic;
+
+        while (current?.parentTopicId) {
+            const parent = this.getTopicById(current.parentTopicId);
+            if (!parent) break;
+            path.push(parent);
+            current = parent;
+        }
+
+        return path;
     }
 }
 
