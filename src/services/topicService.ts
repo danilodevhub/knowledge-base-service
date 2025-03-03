@@ -222,23 +222,42 @@ export class TopicService {
     }
 
     // Delete a topic and all its versions
-    deleteTopic(id: string): boolean {
+    deleteTopic(id: string, options: { cascade?: boolean } = {}): { success: boolean; error?: string } {
         const topic = this.getTopicById(id);
         
         if (!topic) {
-            return false;
+            return { success: false, error: 'Topic not found' };
         }
+
+        // Check for child topics
+        const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === id);
         
-        // Remove all versions
-        this.versionDao.delete(tv => tv.topicId === id);
-        
-        // Remove the topic
-        this.topicDao.delete(t => t.id === id);
-        
-        // Remove all child topics recursively
-        this.deleteChildTopics(id);
-        
-        return true;
+        if (childTopics.length > 0 && !options.cascade) {
+            return {
+                success: false,
+                error: `Cannot delete topic with ${childTopics.length} child topics. Use cascade=true to delete all children.`
+            };
+        }
+
+        try {
+            if (options.cascade) {
+                // Remove all child topics recursively
+                this.deleteChildTopics(id);
+            }
+
+            // Remove all versions
+            this.versionDao.delete(tv => tv.topicId === id);
+            
+            // Remove the topic
+            this.topicDao.delete(t => t.id === id);
+            
+            return { success: true };
+        } catch (error: any) {
+            return { 
+                success: false, 
+                error: `Failed to delete topic: ${error.message}` 
+            };
+        }
     }
 
     // Helper method to delete child topics

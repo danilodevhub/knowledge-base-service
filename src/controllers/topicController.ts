@@ -314,45 +314,23 @@ export const removeTopicResource = (req: AuthRequest, res: Response, next: NextF
 // DELETE a topic
 export const deleteTopic = (req: AuthRequest, res: Response, next: NextFunction): void => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
+    const cascade = req.query.cascade === 'true';
     
-    // Get the topic to check ownership
-    const existingTopic = topicService.getTopicById(id);
-    if (!existingTopic) {
-      res.status(404).json({ message: 'Topic not found' });
+    const result = topicService.deleteTopic(id, { cascade });
+    
+    if (!result.success) {
+      if (result.error?.includes('not found')) {
+        res.status(404).json({ error: result.error });
+      } else if (result.error?.includes('child topics')) {
+        res.status(409).json({ error: result.error });
+      } else {
+        res.status(500).json({ error: result.error });
+      }
       return;
     }
     
-    // Check if user has permission to delete this topic
-    const userId = req.user?.id;
-    if (!userId) {
-      res.status(401).json({ message: 'User ID not found in request' });
-      return;
-    }
-    
-    // Additional permission check using Strategy pattern
-    if (!permissionService.canDelete(userId, ResourceType.TOPIC, existingTopic.ownerId)) {
-      res.status(403).json({ 
-        message: 'You do not have permission to delete this topic',
-        details: {
-          role: req.user?.role,
-          isOwner: userId === existingTopic.ownerId
-        }
-      });
-      return;
-    }
-    
-    // Log the user who deleted the topic
-    console.log(`Topic deleted by user: ${userId} (${req.user?.role})`);
-    
-    const deleted = topicService.deleteTopic(id);
-    
-    if (!deleted) {
-      res.status(404).json({ message: 'Topic not found' });
-      return;
-    }
-    
-    res.status(200).json({ message: 'Topic deleted successfully' });
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
