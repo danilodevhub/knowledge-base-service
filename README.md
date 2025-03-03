@@ -1,46 +1,57 @@
 # Knowledge Base Service
 
-A RESTful API service for managing topics with versioning support.
+A RESTful API service for managing topics with versioning support and hierarchical organization.
 
 ## Features
 
 - Create, read, update, and delete topics with version control
 - Hierarchical topic organization (parent-child relationships)
 - Version history for each topic
-- Composite pattern for topic hierarchies
-- Factory pattern for creating topics and versions
+- Resource attachments (video, article, podcast, audio, image, pdf)
+- Find shortest path between topics in the hierarchy (comming soon)
+- Role-based access control (admin, editor, viewer)
+- Cascade delete support for hierarchical topics
 
 ## Tech Stack
 
-- Node.js
+- Node.js (v16 or higher recommended)
 - Express.js
 - TypeScript
 - RESTful API design
-- Design Patterns (Factory, Composite)
+- Design Patterns:
+  - Singleton (Services)
+  - Factory (DAO creation)
+  - Strategy (Permissions)
+  - Composite (Topic hierarchy)
+  - DAO & Repository (Data access)
+  - Service Layer
+  - Observer (Middleware)
+  - Builder (Topic creation)
+  - Version Control
+  - MVC
+  - Error Handler
+  - Dependency Injection (manual)
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
 
 ## Installation
 
-1. Clone the repository:
-   ```
-   git clone <repository-url>
-   cd knowledge-base-service
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
    ```
    npm install
    ```
 
-3. Set up environment variables:
+2. Set up environment variables:
    ```
    cp .env.example .env
    ```
-   Edit the `.env` file to configure your environment.
+   Required environment variables:
+   - `PORT`: Server port (default: 3000)
+   - `NODE_ENV`: Environment (development/production)
+   - `STORAGE_PATH`: Path for JSON storage files
 
 ## Development
 
@@ -64,33 +75,33 @@ npm start
 
 ## Authentication
 
-This service uses role-based access control:
-- Admin users can perform all operations
-- Editor users can create and edit content
-- Viewer users can only view content
+This service uses role-based access control with the following roles:
+- Admin: Full access to all operations
+- Editor: Can create, edit, and manage resources
+- Viewer: Read-only access
+
+Authentication is implemented via middleware that checks user roles and ownership.
 
 ## API Endpoints
 
-### Authentication
-- POST /auth/login - Authenticate a user and get a token
-
 ### Topics
 
-- `GET /knowledge-base/topics` - Get all topics (latest versions)
-- `GET /knowledge-base/topics/:id` - Get a specific topic by ID (latest version)
-- `GET /knowledge-base/topics/:id/versions` - Get all versions of a topic
-- `GET /knowledge-base/topics/:id/versions/:version` - Get a specific version of a topic
-- `GET /knowledge-base/topics/:id/hierarchy` - Get the topic hierarchy starting from a specific topic
-- `POST /knowledge-base/topics` - Create a new topic
-- `PUT /knowledge-base/topics/:id` - Update a topic (creates a new version)
-- `DELETE /knowledge-base/topics/:id` - Delete a topic and all its versions
+- `GET /topics` - Get all topics (latest versions)
+- `GET /topics/:id` - Get a specific topic by ID (latest version)
+- `GET /topics/:id/versions` - Get all versions of a topic
+- `GET /topics/:id/versions/:version` - Get a specific version of a topic
+- `GET /topics/:id/hierarchy` - Get the topic hierarchy starting from a specific topic
+- `GET /topics/path/:fromId/:toId` - Find shortest path between two topics
+- `GET /topics/ancestor/:topicId1/:topicId2` - Find lowest common ancestor of two topics
+- `POST /topics` - Create a new topic
+- `PUT /topics/:id` - Update a topic (creates a new version)
+- `DELETE /topics/:id` - Delete a topic (add ?cascade=true to delete children)
 
 ### Topic Resources
-- PUT /knowledge-base/topics/:id/resource - Set a resource for a topic (requires admin or editor role)
-- DELETE /knowledge-base/topics/:id/resource - Remove a resource from a topic (requires admin or editor role)
+- `PUT /topics/:id/resource` - Set a resource for a topic
+- `DELETE /topics/:id/resource` - Remove a resource from a topic
 
 ### Health Check
-
 - `GET /health` - Check if the service is running
 
 ## Request/Response Examples
@@ -99,55 +110,75 @@ This service uses role-based access control:
 
 **Request:**
 ```http
-POST /knowledge-base/topics
+POST /topics
 Content-Type: application/json
 
 {
-  "name": "Introduction to TypeScript",
-  "content": "TypeScript is a strongly typed programming language that builds on JavaScript...",
-  "parentTopicId": null
-}
-```
-
-**Response:**
-```json
-{
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "name": "Introduction to TypeScript",
-  "content": "TypeScript is a strongly typed programming language that builds on JavaScript...",
-  "parentTopicId": null,  
-  "version": 1,
-  "createdAt": "2023-08-27T12:00:00.000Z",
-  "updatedAt": "2023-08-27T12:00:00.000Z"
-}
-```
-
-### Update a Topic (Create New Version)
-
-**Request:**
-```http
-PUT /knowledge-base/topics/123e4567-e89b-12d3-a456-426614174000
-Content-Type: application/json
-
-{
-  "name": "Introduction to TypeScript",
-  "content": "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale..."
-}
-```
-
-**Response:**
-```json
-{
-  "id": "123e4567-e89b-12d3-a456-426614174000",
-  "name": "Introduction to TypeScript",
-  "content": "TypeScript is a strongly typed programming language that builds on JavaScript, giving you better tooling at any scale...",
+  "name": "Introduction to Soccer",
+  "content": "Soccer is the world's most popular sport...",
   "parentTopicId": null,
-  "version": 2,
-  "createdAt": "2023-08-27T12:00:00.000Z",
-  "updatedAt": "2023-08-27T12:30:00.000Z"
+  "resource": {
+    "url": "https://example.com/soccer-intro",
+    "description": "Comprehensive guide to soccer",
+    "type": "article"
+  }
 }
 ```
+
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "name": "Introduction to Soccer",
+  "content": "Soccer is the world's most popular sport...",
+  "parentTopicId": null,
+  "version": 1,
+  "ownerId": "user123",
+  "createdAt": "2023-08-27T12:00:00.000Z",
+  "updatedAt": "2023-08-27T12:00:00.000Z",
+  "resource": {
+    "id": "res123",
+    "url": "https://example.com/soccer-intro",
+    "description": "Comprehensive guide to soccer",
+    "type": "article",
+    "topicId": "123e4567-e89b-12d3-a456-426614174000"
+  }
+}
+```
+
+### Error Responses
+
+```json
+// 404 Not Found
+{
+  "message": "Topic not found"
+}
+
+// 403 Forbidden
+{
+  "message": "You do not have permission to update this topic",
+  "details": {
+    "role": "viewer",
+    "isOwner": false
+  }
+}
+
+// 409 Conflict (Delete with children)
+{
+  "error": "Cannot delete topic with 2 child topics. Use cascade=true to delete all children."
+}
+```
+
+### Resource Types
+
+Valid resource types:
+- video
+- article
+- podcast
+- audio
+- image
+- pdf
 
 ## License
 
-MIT # Updated on Sun Mar  2 16:10:06 -03 2025
+MIT
