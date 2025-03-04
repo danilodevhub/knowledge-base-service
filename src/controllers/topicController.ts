@@ -4,11 +4,10 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { Response } from 'express';
 import { ResourceType, Action } from '../models/permission';
 import { permissionService } from '../services/permissionService';
+import { LogUtils } from '../utils/logUtils';
 
-// Simple error logger
-const logError = (operation: string, error: any, context?: any) => {
-    console.error(`[TopicController] Error during ${operation}:`, error.message, context ? `\nContext: ${JSON.stringify(context)}` : '');
-};
+// Service name constant for logging
+const SERVICE_NAME = 'TopicController';
 
 // Initialize the topic service
 const topicService = new TopicService();
@@ -111,7 +110,7 @@ export const createTopic = (req: AuthRequest, res: Response, next: NextFunction)
     }
     
     // Log the user who created the topic
-    console.log(`Topic created by user: ${userId} (${req.user?.role})`);
+    LogUtils.logInfo(SERVICE_NAME, 'createTopic', `Topic created by user ${userId}`, { userId, role: req.user?.role });
     
     // Create the topic with the user as owner
     const topic = topicService.createTopic(
@@ -183,7 +182,7 @@ export const updateTopic = (req: AuthRequest, res: Response, next: NextFunction)
     }
     
     // Log the user who updated the topic
-    console.log(`Topic updated by user: ${userId} (${req.user?.role})`);
+    LogUtils.logInfo(SERVICE_NAME, 'updateTopic', `Topic updated by user ${userId}`, { userId, role: req.user?.role, topicId: id });
     
     // Update the topic
     const updatedTopic = topicService.updateTopic(id, name, content, resource);
@@ -247,7 +246,7 @@ export const setTopicResource = (req: AuthRequest, res: Response, next: NextFunc
     }
     
     // Log the user who set the resource
-    console.log(`Resource set by user: ${userId} (${req.user?.role})`);
+    LogUtils.logInfo(SERVICE_NAME, 'setTopicResource', `Resource set by user ${userId}`, { userId, role: req.user?.role, topicId: id, resourceType: type });
     
     // Set the resource
     const updatedTopic = topicService.setTopicResource(id, url, description, type);
@@ -300,7 +299,7 @@ export const removeTopicResource = (req: AuthRequest, res: Response, next: NextF
     }
     
     // Log the user who removed the resource
-    console.log(`Resource removed by user: ${userId} (${req.user?.role})`);
+    LogUtils.logInfo(SERVICE_NAME, 'removeTopicResource', `Resource removed by user ${userId}`, { userId, role: req.user?.role, topicId: id });
     
     // Remove the resource
     const updatedTopic = topicService.removeTopicResource(id);
@@ -337,7 +336,7 @@ export const deleteTopic = (req: AuthRequest, res: Response, next: NextFunction)
         
         res.status(204).send();
     } catch (error: any) {
-        logError('deleteTopic', error, { 
+        LogUtils.logError(SERVICE_NAME, 'deleteTopic', error, { 
             topicId: req.params.id,
             userId: req.user?.id
         });
@@ -388,7 +387,7 @@ export const getShortestPath = (req: AuthRequest, res: Response, next: NextFunct
             distance: result.distance
         });
     } catch (error: any) {
-        logError('getShortestPath', error, { fromId: req.params.fromId, toId: req.params.toId });
+        LogUtils.logError(SERVICE_NAME, 'getShortestPath', error, { fromId: req.params.fromId, toId: req.params.toId });
         next(error);
     }
 };
@@ -416,7 +415,7 @@ export const getLowestCommonAncestor = (req: AuthRequest, res: Response, next: N
             parentTopicId: ancestor.parentTopicId
         });
     } catch (error: any) {
-        logError('getLowestCommonAncestor', error, { 
+        LogUtils.logError(SERVICE_NAME, 'getLowestCommonAncestor', error, { 
             topicId1: req.params.topicId1, 
             topicId2: req.params.topicId2 
         });

@@ -4,13 +4,12 @@ import { TopicResource } from '../models/topicResource';
 import { IDao } from '../dao/IDao';
 import { DaoFactory } from '../dao/daoFactory';
 import { v4 as uuidv4 } from 'uuid';
+import { LogUtils } from '../utils/logUtils';
 
 // Simple error logger
-const logError = (operation: string, error: any, context?: any) => {
-    console.error(`[TopicService] Error during ${operation}:`, error.message, context ? `\nContext: ${JSON.stringify(context)}` : '');
-};
+// Moved to LogUtils class
 
-interface PathNode {
+export interface PathNode {
     topic: Topic;
     distance: number;
     path: Topic[];
@@ -20,11 +19,16 @@ export class TopicService {
     private topicFactory: TopicFactoryImpl;
     private topicDao: IDao<Topic>;
     private versionDao: IDao<TopicVersion>;
+    private readonly SERVICE_NAME = 'TopicService';
 
-    constructor() {
-        this.topicFactory = new TopicFactoryImpl();
-        this.topicDao = DaoFactory.createJsonFileDao<Topic>('topics.json');
-        this.versionDao = DaoFactory.createJsonFileDao<TopicVersion>('topic-versions.json');
+    constructor(
+        topicFactory?: TopicFactoryImpl,
+        topicDao?: IDao<Topic>,
+        versionDao?: IDao<TopicVersion>
+    ) {
+        this.topicFactory = topicFactory || new TopicFactoryImpl();
+        this.topicDao = topicDao || DaoFactory.createJsonFileDao<Topic>('topics.json');
+        this.versionDao = versionDao || DaoFactory.createJsonFileDao<TopicVersion>('topic-versions.json');
     }
 
     // Get all topics (latest versions)
@@ -35,6 +39,8 @@ export class TopicService {
 
     // Get a specific topic by ID (latest version)
     getTopicById(id: string): Topic | null {
+        if (!id) return null;
+        
         const topicData = this.topicDao.findById(id);
         if (!topicData) {
             return null;
@@ -44,6 +50,8 @@ export class TopicService {
 
     // Get a specific version of a topic
     getTopicVersion(id: string, version: number): TopicVersion | null {
+        if (!id) return null;
+        
         const versionData = this.versionDao.findBy(tv => tv.topicId === id && tv.version === version);
         if (!versionData) {
             return null;
@@ -64,6 +72,8 @@ export class TopicService {
 
     // Get all versions of a topic
     getAllTopicVersions(id: string): TopicVersion[] {
+        if (!id) return [];
+        
         const versions = this.versionDao.findManyBy(tv => tv.topicId === id);
         return versions.map(version => new TopicVersionImpl(
             version.id,
@@ -91,6 +101,10 @@ export class TopicService {
             type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf' 
         }
     ): Topic {
+        if (!name || !content || !ownerId) {
+            throw new Error('Name, content, and ownerId are required');
+        }
+        
         // Create resource if data is provided
         let resource: TopicResource | undefined = undefined;
         
@@ -133,6 +147,10 @@ export class TopicService {
             type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf' 
         }
     ): Topic | null {
+        if (!id || !name || !content) {
+            return null;
+        }
+        
         const topic = this.getTopicById(id);
         
         if (!topic) {
@@ -182,6 +200,10 @@ export class TopicService {
         description: string, 
         type: 'video' | 'article' | 'podcast' | 'audio' | 'image' | 'pdf'
     ): Topic | null {
+        if (!id || !url || !description || !type) {
+            return null;
+        }
+        
         const topic = this.getTopicById(id);
         
         if (!topic) {
@@ -212,6 +234,8 @@ export class TopicService {
 
     // Remove a resource from a topic
     removeTopicResource(id: string): Topic | null {
+        if (!id) return null;
+        
         const topic = this.getTopicById(id);
         
         if (!topic || !topic.resource) {
@@ -234,6 +258,10 @@ export class TopicService {
 
     // Delete a topic and all its versions
     deleteTopic(id: string, options: { cascade?: boolean } = {}): { success: boolean; error?: string } {
+        if (!id) {
+            return { success: false, error: 'Topic ID is required' };
+        }
+        
         try {
             const topic = this.getTopicById(id);
             
@@ -263,7 +291,7 @@ export class TopicService {
             
             return { success: true };
         } catch (error: any) {
-            logError('deleteTopic', error, { topicId: id, cascade: options.cascade });
+            LogUtils.logError(this.SERVICE_NAME, 'deleteTopic', error, { topicId: id, cascade: options.cascade });
             return { 
                 success: false, 
                 error: `Failed to delete topic: ${error.message}` 
@@ -273,19 +301,23 @@ export class TopicService {
 
     // Helper method to delete child topics
     private deleteChildTopics(parentTopicId: string): void {
+        if (!parentTopicId) return;
+        
         try {
             const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === parentTopicId);
             for (const childTopic of childTopics) {
                 this.deleteTopic(childTopic.id, { cascade: true });
             }
         } catch (error: any) {
-            logError('deleteChildTopics', error, { parentTopicId });
+            LogUtils.logError(this.SERVICE_NAME, 'deleteChildTopics', error, { parentTopicId });
             throw error; // Re-throw to be handled by the parent method
         }
     }
 
     // Get topic hierarchy using composite pattern
     getTopicHierarchy(id: string): CompositeTopic | null {
+        if (!id) return null;
+        
         const topic = this.getTopicById(id);
         
         if (!topic) {
@@ -326,6 +358,10 @@ export class TopicService {
 
     // Find shortest path between two topics
     findShortestPath(fromTopicId: string, toTopicId: string): { path: Topic[]; distance: number } | null {
+        if (!fromTopicId || !toTopicId) {
+            return null;
+        }
+        
         try {
             const fromTopic = this.getTopicById(fromTopicId);
             const toTopic = this.getTopicById(toTopicId);
@@ -393,13 +429,17 @@ export class TopicService {
             // No path found
             return null;
         } catch (error: any) {
-            logError('findShortestPath', error, { fromTopicId, toTopicId });
+            LogUtils.logError(this.SERVICE_NAME, 'findShortestPath', error, { fromTopicId, toTopicId });
             return null;
         }
     }
 
     // Find the lowest common ancestor of two topics
     findLowestCommonAncestor(topicId1: string, topicId2: string): Topic | null {
+        if (!topicId1 || !topicId2) {
+            return null;
+        }
+        
         try {
             const topic1 = this.getTopicById(topicId1);
             const topic2 = this.getTopicById(topicId2);
@@ -423,13 +463,15 @@ export class TopicService {
 
             return null;
         } catch (error: any) {
-            logError('findLowestCommonAncestor', error, { topicId1, topicId2 });
+            LogUtils.logError(this.SERVICE_NAME, 'findLowestCommonAncestor', error, { topicId1, topicId2 });
             return null;
         }
     }
 
     // Helper method to get path from topic to root
     private getPathToRoot(topic: Topic): Topic[] {
+        if (!topic) return [];
+        
         const path: Topic[] = [topic];
         let current: Topic | null = topic;
 

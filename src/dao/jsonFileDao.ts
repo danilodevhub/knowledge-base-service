@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { IDao } from './IDao';
+import { LogUtils } from '../utils/logUtils';
 
 // Load environment variables
 dotenv.config();
@@ -12,6 +13,7 @@ const STORAGE_DIR = process.env.STORAGE_PATH || path.join(process.cwd(), 'storag
 // JSON File DAO Implementation
 export class JsonFileDao<T> implements IDao<T> {
     private filePath: string;
+    private readonly SERVICE_NAME = 'JsonFileDao';
 
     constructor(fileName: string) {
         // Ensure storage directory exists
@@ -33,7 +35,7 @@ export class JsonFileDao<T> implements IDao<T> {
             const data = fs.readFileSync(this.filePath, 'utf8');
             return JSON.parse(data);
         } catch (error: any) {
-            console.error(`Error reading from ${this.filePath}:`, error.message);
+            LogUtils.logError(this.SERVICE_NAME, 'readData', error, { filePath: this.filePath });
             return [];
         }
     }
@@ -42,7 +44,7 @@ export class JsonFileDao<T> implements IDao<T> {
         try {
             fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), 'utf8');
         } catch (error: any) {
-            console.error(`Error writing to ${this.filePath}:`, error.message);
+            LogUtils.logError(this.SERVICE_NAME, 'writeData', error, { filePath: this.filePath });
             throw new Error(`Failed to write data to storage: ${error.message}`);
         }
     }

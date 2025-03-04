@@ -31,6 +31,7 @@ A RESTful API service for managing topics with versioning support and hierarchic
   - MVC
   - Error Handler
   - Dependency Injection (manual)
+  - Utility Classes (reusable functionality)
 
 ## Prerequisites
 
