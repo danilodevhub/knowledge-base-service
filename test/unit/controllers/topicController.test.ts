@@ -5,7 +5,6 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../../src/middleware/authMiddleware';
 import { LogUtils } from '../../../src/utils/logUtils';
 import { Topic } from '../../../src/models/topic';
-import { TopicResource } from '../../../src/models/topicResource';
 import { ResourceType, Action } from '../../../src/models/permission';
 
 // Mock the dependencies

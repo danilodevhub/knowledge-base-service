@@ -2,8 +2,7 @@ import {
     Topic, 
     TopicVersion, 
     VersionedEntity, 
-    TopicFactory, 
-    CompositeTopicComponent 
+    TopicFactory
 } from './topic';
 import { TopicResource } from './topicResource';
 import { v4 as uuidv4 } from 'uuid';
