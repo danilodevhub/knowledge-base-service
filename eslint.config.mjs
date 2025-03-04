@@ -4,7 +4,7 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   {
-    ignores: ['node_modules', 'dist', 'coverage', '*.js.map', '*.d.ts', 'jest.config.js'],
+    ignores: ['node_modules', 'dist', 'coverage', '*.js.map', '*.d.ts', 'jest.config.cjs'],
   },
   ...tseslint.configs.recommended,
   prettierConfig,
