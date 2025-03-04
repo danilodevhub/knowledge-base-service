@@ -6,9 +6,6 @@ import { DaoFactory } from '../dao/daoFactory';
 import { v4 as uuidv4 } from 'uuid';
 import { LogUtils } from '../utils/logUtils';
 
-// Simple error logger
-// Moved to LogUtils class
-
 export interface PathNode {
     topic: Topic;
     distance: number;
