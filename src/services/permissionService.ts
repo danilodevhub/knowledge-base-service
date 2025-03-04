@@ -1,11 +1,11 @@
-import { 
-  PermissionStrategy, 
-  AdminPermissionStrategy, 
-  EditorPermissionStrategy, 
+import {
+  PermissionStrategy,
+  AdminPermissionStrategy,
+  EditorPermissionStrategy,
   ViewerPermissionStrategy,
   SelfPermissionStrategy,
   ResourceType,
-  Action
+  Action,
 } from '../models/permission';
 
 import { userService as defaultUserService, UserService } from './userService';
@@ -32,22 +32,30 @@ export class PermissionService {
    * @param resourceOwnerId The ID of the resource owner (if applicable)
    * @returns boolean indicating if the user has permission
    */
-  hasPermission(userId: string, resourceType: ResourceType, action: Action, resourceOwnerId?: string): boolean {
+  hasPermission(
+    userId: string,
+    resourceType: ResourceType,
+    action: Action,
+    resourceOwnerId?: string,
+  ): boolean {
     // Get the user's role
     const user = this.userService.getUserById(userId);
-    
+
     if (!user) {
       return false;
     }
 
     // Check if the user is the owner of the resource
-    if (resourceOwnerId && this.selfStrategy.hasPermission(userId, resourceType, action, resourceOwnerId)) {
+    if (
+      resourceOwnerId &&
+      this.selfStrategy.hasPermission(userId, resourceType, action, resourceOwnerId)
+    ) {
       return true;
     }
 
     // Get the appropriate strategy based on the user's role
     const strategy = this.strategies.get(user.role);
-    
+
     if (!strategy) {
       return false;
     }
@@ -86,4 +94,4 @@ export class PermissionService {
 }
 
 // Export singleton instance
-export const permissionService = new PermissionService(); 
+export const permissionService = new PermissionService();

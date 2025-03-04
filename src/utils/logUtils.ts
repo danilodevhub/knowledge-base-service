@@ -11,9 +11,9 @@ export class LogUtils {
    */
   static logError(service: string, operation: string, error: any, context?: any): void {
     console.error(
-      `[${service}] Error during ${operation}:`, 
-      error.message || error, 
-      context ? `\nContext: ${JSON.stringify(context)}` : ''
+      `[${service}] Error during ${operation}:`,
+      error.message || error,
+      context ? `\nContext: ${JSON.stringify(context)}` : '',
     );
   }
 
@@ -26,9 +26,9 @@ export class LogUtils {
    */
   static logWarning(service: string, operation: string, message: string, context?: any): void {
     console.warn(
-      `[${service}] Warning during ${operation}:`, 
-      message, 
-      context ? `\nContext: ${JSON.stringify(context)}` : ''
+      `[${service}] Warning during ${operation}:`,
+      message,
+      context ? `\nContext: ${JSON.stringify(context)}` : '',
     );
   }
 
@@ -41,9 +41,9 @@ export class LogUtils {
    */
   static logInfo(service: string, operation: string, message: string, context?: any): void {
     console.log(
-      `[${service}] Info during ${operation}:`, 
-      message, 
-      context ? `\nContext: ${JSON.stringify(context)}` : ''
+      `[${service}] Info during ${operation}:`,
+      message,
+      context ? `\nContext: ${JSON.stringify(context)}` : '',
     );
   }
-} 
+}

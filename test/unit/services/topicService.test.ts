@@ -10,8 +10,8 @@ jest.mock('../../../src/utils/logUtils', () => ({
   LogUtils: {
     logError: jest.fn(),
     logWarning: jest.fn(),
-    logInfo: jest.fn()
-  }
+    logInfo: jest.fn(),
+  },
 }));
 
 // Mock data for topics
@@ -28,7 +28,7 @@ const mockTopics: Topic[] = [
     resource: null,
     createNewVersion: jest.fn(),
     setResource: jest.fn(),
-    removeResource: jest.fn()
+    removeResource: jest.fn(),
   },
   {
     id: 'topic2',
@@ -42,7 +42,7 @@ const mockTopics: Topic[] = [
     resource: null,
     createNewVersion: jest.fn(),
     setResource: jest.fn(),
-    removeResource: jest.fn()
+    removeResource: jest.fn(),
   },
   {
     id: 'topic3',
@@ -56,7 +56,7 @@ const mockTopics: Topic[] = [
     resource: null,
     createNewVersion: jest.fn(),
     setResource: jest.fn(),
-    removeResource: jest.fn()
+    removeResource: jest.fn(),
   },
   {
     id: 'topic4',
@@ -70,8 +70,8 @@ const mockTopics: Topic[] = [
     resource: null,
     createNewVersion: jest.fn(),
     setResource: jest.fn(),
-    removeResource: jest.fn()
-  }
+    removeResource: jest.fn(),
+  },
 ];
 
 // Mock versions
@@ -86,7 +86,7 @@ const mockVersions: TopicVersion[] = [
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-01'),
     ownerId: 'user1',
-    resource: null
+    resource: null,
   },
   {
     id: 'version2',
@@ -98,8 +98,8 @@ const mockVersions: TopicVersion[] = [
     createdAt: new Date('2023-01-01'),
     updatedAt: new Date('2023-01-05'),
     ownerId: 'user1',
-    resource: null
-  }
+    resource: null,
+  },
 ];
 
 // Mock Topic Factory
@@ -109,7 +109,7 @@ class MockTopicFactory extends TopicFactoryImpl {
     content: string,
     parentTopicId: string | null,
     ownerId: string,
-    resource?: TopicResource
+    resource?: TopicResource,
   ): Topic {
     const topic: Topic = {
       id: 'new-topic-id',
@@ -121,11 +121,15 @@ class MockTopicFactory extends TopicFactoryImpl {
       updatedAt: new Date(),
       ownerId,
       resource: resource || null,
-      createNewVersion: jest.fn(function(): Topic { 
-        return { ...this, version: this.version + 1 }; 
+      createNewVersion: jest.fn(function (): Topic {
+        return { ...this, version: this.version + 1 };
       }),
-      setResource: jest.fn(function(this: Topic, r: TopicResource) { this.resource = r; }),
-      removeResource: jest.fn(function(this: Topic) { this.resource = null; })
+      setResource: jest.fn(function (this: Topic, r: TopicResource) {
+        this.resource = r;
+      }),
+      removeResource: jest.fn(function (this: Topic) {
+        this.resource = null;
+      }),
     };
     return topic;
   }
@@ -141,7 +145,7 @@ class MockTopicFactory extends TopicFactoryImpl {
       createdAt: topic.createdAt,
       updatedAt: topic.updatedAt,
       ownerId: topic.ownerId,
-      resource: topic.resource
+      resource: topic.resource,
     };
   }
 }
@@ -239,7 +243,8 @@ describe('TopicService', () => {
     mockVersionDao = new MockVersionDao();
 
     // Mock the DaoFactory.createJsonFileDao method
-    createJsonFileDaoSpy = jest.spyOn(daoFactoryModule.DaoFactory, 'createJsonFileDao')
+    createJsonFileDaoSpy = jest
+      .spyOn(daoFactoryModule.DaoFactory, 'createJsonFileDao')
       .mockImplementation((fileName: string) => {
         if (fileName === 'topics.json') {
           return mockTopicDao;
@@ -341,12 +346,7 @@ describe('TopicService', () => {
 
   describe('createTopic', () => {
     it('should create a new topic', () => {
-      const newTopic = topicService.createTopic(
-        'New Topic',
-        'New Topic Content',
-        null,
-        'user1'
-      );
+      const newTopic = topicService.createTopic('New Topic', 'New Topic Content', null, 'user1');
 
       expect(newTopic).not.toBeNull();
       expect(newTopic.id).toBe('new-topic-id');
@@ -361,7 +361,7 @@ describe('TopicService', () => {
       const resourceData = {
         url: 'https://example.com',
         description: 'Example resource',
-        type: 'article' as const
+        type: 'article' as const,
       };
 
       const newTopic = topicService.createTopic(
@@ -369,7 +369,7 @@ describe('TopicService', () => {
         'Content with resource',
         null,
         'user1',
-        resourceData
+        resourceData,
       );
 
       expect(newTopic).not.toBeNull();
@@ -391,7 +391,7 @@ describe('TopicService', () => {
       const updatedTopic = topicService.updateTopic(
         'topic1',
         'Updated Root Topic',
-        'Updated content'
+        'Updated content',
       );
 
       expect(updatedTopic).not.toBeNull();
@@ -401,11 +401,7 @@ describe('TopicService', () => {
     });
 
     it('should return null when topic does not exist', () => {
-      const result = topicService.updateTopic(
-        'nonexistent',
-        'Updated Topic',
-        'Updated content'
-      );
+      const result = topicService.updateTopic('nonexistent', 'Updated Topic', 'Updated content');
       expect(result).toBeNull();
     });
 
@@ -419,14 +415,14 @@ describe('TopicService', () => {
       const resourceData = {
         url: 'https://example.com',
         description: 'New resource',
-        type: 'article' as const
+        type: 'article' as const,
       };
 
       const updatedTopic = topicService.updateTopic(
         'topic1',
         'Topic with New Resource',
         'Content with resource',
-        resourceData
+        resourceData,
       );
 
       expect(updatedTopic).not.toBeNull();
@@ -442,7 +438,7 @@ describe('TopicService', () => {
         topicId: 'topic1',
         url: 'https://old.example.com',
         description: 'Old resource',
-        type: 'video'
+        type: 'video',
       };
       mockTopicDao.update(t => t.id === 'topic1', topic);
 
@@ -450,14 +446,14 @@ describe('TopicService', () => {
       const resourceData = {
         url: 'https://new.example.com',
         description: 'Updated resource',
-        type: 'article' as const
+        type: 'article' as const,
       };
 
       const updatedTopic = topicService.updateTopic(
         'topic1',
         'Topic with Updated Resource',
         'Content with updated resource',
-        resourceData
+        resourceData,
       );
 
       expect(updatedTopic).not.toBeNull();
@@ -474,7 +470,7 @@ describe('TopicService', () => {
         'topic1',
         'https://example.com',
         'New resource',
-        'article'
+        'article',
       );
 
       expect(updatedTopic).not.toBeNull();
@@ -493,7 +489,7 @@ describe('TopicService', () => {
         topicId: 'topic1',
         url: 'https://old.example.com',
         description: 'Old resource',
-        type: 'video'
+        type: 'video',
       };
       mockTopicDao.update(t => t.id === 'topic1', topic);
 
@@ -502,7 +498,7 @@ describe('TopicService', () => {
         'topic1',
         'https://new.example.com',
         'Updated resource',
-        'article'
+        'article',
       );
 
       expect(updatedTopic).not.toBeNull();
@@ -517,7 +513,7 @@ describe('TopicService', () => {
         'nonexistent',
         'https://example.com',
         'Resource',
-        'article'
+        'article',
       );
       expect(result).toBeNull();
     });
@@ -539,7 +535,7 @@ describe('TopicService', () => {
         topicId: 'topic1',
         url: 'https://example.com',
         description: 'Resource to remove',
-        type: 'video'
+        type: 'video',
       };
       mockTopicDao.update(t => t.id === 'topic1', topic);
 
@@ -612,12 +608,12 @@ describe('TopicService', () => {
       expect(hierarchy).not.toBeNull();
       expect(hierarchy?.topic.id).toBe('topic1');
       expect(hierarchy?.children.length).toBe(2);
-      
+
       // Check if child topics are included
       const childIds = hierarchy?.children.map(child => child.topic.id);
       expect(childIds).toContain('topic2');
       expect(childIds).toContain('topic3');
-      
+
       // Check if grandchild topic is included under the correct parent
       const child2 = hierarchy?.children.find(child => child.topic.id === 'topic2');
       expect(child2?.children.length).toBe(1);
@@ -685,7 +681,7 @@ describe('TopicService', () => {
         resource: null,
         createNewVersion: jest.fn(),
         setResource: jest.fn(),
-        removeResource: jest.fn()
+        removeResource: jest.fn(),
       };
       mockTopicDao.create(isolatedTopic);
 
@@ -737,7 +733,7 @@ describe('TopicService', () => {
         resource: null,
         createNewVersion: jest.fn(),
         setResource: jest.fn(),
-        removeResource: jest.fn()
+        removeResource: jest.fn(),
       };
       mockTopicDao.create(isolatedTopic);
 
@@ -755,4 +751,4 @@ describe('TopicService', () => {
       expect(topicService.findLowestCommonAncestor('topic1', null as any)).toBeNull();
     });
   });
-}); 
+});

@@ -1,25 +1,25 @@
 import express, { Router } from 'express';
 
-import { 
-    getAllTopics, 
-    getTopicById, 
-    getTopicVersion,
-    getAllTopicVersions,
-    createTopic, 
-    updateTopic, 
-    deleteTopic,
-    getTopicHierarchy,
-    setTopicResource,
-    removeTopicResource,
-    getShortestPath,
-    getLowestCommonAncestor
+import {
+  getAllTopics,
+  getTopicById,
+  getTopicVersion,
+  getAllTopicVersions,
+  createTopic,
+  updateTopic,
+  deleteTopic,
+  getTopicHierarchy,
+  setTopicResource,
+  removeTopicResource,
+  getShortestPath,
+  getLowestCommonAncestor,
 } from '../controllers/topicController';
-import { 
-    authenticate, 
-    authorizeTopicRead,
-    authorizeTopicCreate,
-    authorizeTopicUpdate,
-    authorizeTopicDelete
+import {
+  authenticate,
+  authorizeTopicRead,
+  authorizeTopicCreate,
+  authorizeTopicUpdate,
+  authorizeTopicDelete,
 } from '../middleware/authMiddleware';
 
 const router: Router = express.Router();
@@ -44,7 +44,12 @@ router.get('/:id/hierarchy', authenticate, authorizeTopicRead, getTopicHierarchy
 router.get('/path/:fromId/:toId', authenticate, authorizeTopicRead, getShortestPath);
 
 // GET lowest common ancestor of two topics
-router.get('/ancestor/:topicId1/:topicId2', authenticate, authorizeTopicRead, getLowestCommonAncestor);
+router.get(
+  '/ancestor/:topicId1/:topicId2',
+  authenticate,
+  authorizeTopicRead,
+  getLowestCommonAncestor,
+);
 
 // Protected routes - authentication and authorization required
 // POST a new topic
@@ -62,4 +67,4 @@ router.delete('/:id/resource', authenticate, authorizeTopicUpdate, removeTopicRe
 // DELETE a topic
 router.delete('/:id', authenticate, authorizeTopicDelete, deleteTopic);
 
-export default router; 
+export default router;

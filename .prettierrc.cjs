@@ -10,4 +10,4 @@ module.exports = {
   bracketSpacing: true,
   arrowParens: 'avoid',
   endOfLine: 'lf',
-}; 
+};

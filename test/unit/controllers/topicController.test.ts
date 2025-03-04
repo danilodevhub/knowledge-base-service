@@ -26,7 +26,7 @@ const mockTopic: Topic = {
   resource: null,
   createNewVersion: jest.fn(),
   setResource: jest.fn(),
-  removeResource: jest.fn()
+  removeResource: jest.fn(),
 };
 
 // Define mock versions
@@ -41,7 +41,7 @@ const mockVersions = [
     createdAt: new Date(),
     updatedAt: new Date(),
     ownerId: 'user1',
-    resource: null
+    resource: null,
   },
   {
     id: 'version2',
@@ -53,8 +53,8 @@ const mockVersions = [
     createdAt: new Date(),
     updatedAt: new Date(),
     ownerId: 'user1',
-    resource: null
-  }
+    resource: null,
+  },
 ];
 
 // Mock response object
@@ -87,8 +87,8 @@ describe('TopicController', () => {
       body: {},
       user: {
         id: 'user1',
-        role: 'editor'
-      }
+        role: 'editor',
+      },
     };
   });
 
@@ -230,7 +230,7 @@ describe('TopicController', () => {
       req.body = {
         name: 'New Topic',
         content: 'New content',
-        parentTopicId: null
+        parentTopicId: null,
       };
       mockTopicService.createTopic = jest.fn().mockReturnValue(mockTopic);
 
@@ -243,7 +243,7 @@ describe('TopicController', () => {
         'New content',
         null,
         'user1',
-        undefined
+        undefined,
       );
       expect(LogUtils.logInfo).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
@@ -253,7 +253,7 @@ describe('TopicController', () => {
     it('should return 400 when name is missing', () => {
       // Arrange
       req.body = {
-        content: 'New content'
+        content: 'New content',
       };
 
       // Act
@@ -267,7 +267,7 @@ describe('TopicController', () => {
     it('should return 400 when content is missing', () => {
       // Arrange
       req.body = {
-        name: 'New Topic'
+        name: 'New Topic',
       };
 
       // Act
@@ -285,9 +285,9 @@ describe('TopicController', () => {
         content: 'New content',
         resource: {
           url: 'https://example.com',
-          description: 'Example resource'
+          description: 'Example resource',
           // Missing type
-        }
+        },
       };
 
       // Act
@@ -295,7 +295,9 @@ describe('TopicController', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Resource must include url, description, and type' });
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Resource must include url, description, and type',
+      });
     });
 
     it('should return 400 when resource type is invalid', () => {
@@ -306,8 +308,8 @@ describe('TopicController', () => {
         resource: {
           url: 'https://example.com',
           description: 'Example resource',
-          type: 'invalid-type'
-        }
+          type: 'invalid-type',
+        },
       };
 
       // Act
@@ -315,8 +317,8 @@ describe('TopicController', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ 
-        message: 'Resource type must be one of: video, article, podcast, audio, image, pdf' 
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Resource type must be one of: video, article, podcast, audio, image, pdf',
       });
     });
 
@@ -324,7 +326,7 @@ describe('TopicController', () => {
       // Arrange
       req.body = {
         name: 'New Topic',
-        content: 'New content'
+        content: 'New content',
       };
       req.user = undefined;
 
@@ -342,10 +344,12 @@ describe('TopicController', () => {
       req.params = { id: 'topic1' };
       req.body = {
         name: 'Updated Topic',
-        content: 'Updated content'
+        content: 'Updated content',
       };
       mockTopicService.getTopicById = jest.fn().mockReturnValue(mockTopic);
-      mockTopicService.updateTopic = jest.fn().mockReturnValue({ ...mockTopic, name: 'Updated Topic', content: 'Updated content' });
+      mockTopicService.updateTopic = jest
+        .fn()
+        .mockReturnValue({ ...mockTopic, name: 'Updated Topic', content: 'Updated content' });
       (permissionService.hasPermission as jest.Mock) = jest.fn().mockReturnValue(true);
     });
 
@@ -359,13 +363,13 @@ describe('TopicController', () => {
         'user1',
         ResourceType.TOPIC,
         Action.UPDATE,
-        'user1'
+        'user1',
       );
       expect(mockTopicService.updateTopic).toHaveBeenCalledWith(
         'topic1',
         'Updated Topic',
         'Updated content',
-        undefined
+        undefined,
       );
       expect(LogUtils.logInfo).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
@@ -420,8 +424,8 @@ describe('TopicController', () => {
         message: 'You do not have permission to update this topic',
         details: {
           role: 'editor',
-          isOwner: true
-        }
+          isOwner: true,
+        },
       });
     });
 
@@ -457,7 +461,7 @@ describe('TopicController', () => {
         'user1',
         ResourceType.TOPIC,
         Action.DELETE,
-        'user1'
+        'user1',
       );
       expect(mockTopicService.deleteTopic).toHaveBeenCalledWith('topic1', { cascade: false });
       expect(res.status).toHaveBeenCalledWith(204);
@@ -490,7 +494,7 @@ describe('TopicController', () => {
       // Arrange
       mockTopicService.deleteTopic = jest.fn().mockReturnValue({
         success: false,
-        error: 'Cannot delete topic with child topics. Use cascade=true to delete all children.'
+        error: 'Cannot delete topic with child topics. Use cascade=true to delete all children.',
       });
 
       // Act
@@ -499,7 +503,7 @@ describe('TopicController', () => {
       // Assert
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Cannot delete topic with child topics. Use cascade=true to delete all children.'
+        error: 'Cannot delete topic with child topics. Use cascade=true to delete all children.',
       });
     });
 
@@ -525,16 +529,19 @@ describe('TopicController', () => {
       req.body = {
         url: 'https://example.com',
         description: 'Example resource',
-        type: 'article'
+        type: 'article',
       };
       mockTopicService.getTopicById = jest.fn().mockReturnValue(mockTopic);
-      mockTopicService.setTopicResource = jest.fn().mockReturnValue({ ...mockTopic, resource: {
-        id: 'resource1',
-        url: 'https://example.com',
-        description: 'Example resource',
-        type: 'article',
-        topicId: 'topic1'
-      }});
+      mockTopicService.setTopicResource = jest.fn().mockReturnValue({
+        ...mockTopic,
+        resource: {
+          id: 'resource1',
+          url: 'https://example.com',
+          description: 'Example resource',
+          type: 'article',
+          topicId: 'topic1',
+        },
+      });
       (permissionService.hasPermission as jest.Mock) = jest.fn().mockReturnValue(true);
     });
 
@@ -548,13 +555,13 @@ describe('TopicController', () => {
         'user1',
         ResourceType.TOPIC,
         Action.UPDATE,
-        'user1'
+        'user1',
       );
       expect(mockTopicService.setTopicResource).toHaveBeenCalledWith(
         'topic1',
         'https://example.com',
         'Example resource',
-        'article'
+        'article',
       );
       expect(LogUtils.logInfo).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
@@ -564,7 +571,7 @@ describe('TopicController', () => {
       // Arrange
       req.body = {
         url: 'https://example.com',
-        description: 'Example resource'
+        description: 'Example resource',
         // Missing type
       };
 
@@ -599,8 +606,8 @@ describe('TopicController', () => {
           url: 'https://example.com',
           description: 'Example resource',
           type: 'article',
-          topicId: 'topic1'
-        }
+          topicId: 'topic1',
+        },
       };
       mockTopicService.getTopicById = jest.fn().mockReturnValue(mockTopicWithResource);
       mockTopicService.removeTopicResource = jest.fn().mockReturnValue(mockTopic);
@@ -617,7 +624,7 @@ describe('TopicController', () => {
         'user1',
         ResourceType.TOPIC,
         Action.UPDATE,
-        'user1'
+        'user1',
       );
       expect(mockTopicService.removeTopicResource).toHaveBeenCalledWith('topic1');
       expect(LogUtils.logInfo).toHaveBeenCalled();
@@ -657,7 +664,7 @@ describe('TopicController', () => {
         id: 'topic1',
         name: 'Test Topic',
         content: 'Test content',
-        children: []
+        children: [],
       };
       mockTopicService.getTopicHierarchy = jest.fn().mockReturnValue(mockHierarchy);
 
@@ -689,7 +696,7 @@ describe('TopicController', () => {
       req.params = { fromId: 'topic1', toId: 'topic2' };
       const pathResult = {
         path: [mockTopic, { ...mockTopic, id: 'topic2' }],
-        distance: 1
+        distance: 1,
       };
       mockTopicService.findShortestPath = jest.fn().mockReturnValue(pathResult);
     });
@@ -712,7 +719,9 @@ describe('TopicController', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Source and target topics must be different' });
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Source and target topics must be different',
+      });
     });
 
     it('should return 404 when path is not found', () => {
@@ -768,7 +777,9 @@ describe('TopicController', () => {
 
       // Assert
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Topics must be different for finding common ancestor' });
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Topics must be different for finding common ancestor',
+      });
     });
 
     it('should return 404 when ancestor is not found', () => {
@@ -798,4 +809,4 @@ describe('TopicController', () => {
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-}); 
+});

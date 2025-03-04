@@ -8,13 +8,13 @@ export const errorHandler = (
   err: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const statusCode = err.statusCode || 500;
-  
+
   res.status(statusCode).json({
     status: 'error',
     message: err.message || 'Internal Server Error',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
-}; 
+};

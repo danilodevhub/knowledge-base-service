@@ -1,10 +1,10 @@
-import { 
-  ResourceType, 
-  Action, 
-  AdminPermissionStrategy, 
-  EditorPermissionStrategy, 
+import {
+  ResourceType,
+  Action,
+  AdminPermissionStrategy,
+  EditorPermissionStrategy,
   ViewerPermissionStrategy,
-  SelfPermissionStrategy
+  SelfPermissionStrategy,
 } from '../../../src/models/permission';
 
 describe('Permission Strategies', () => {
@@ -89,10 +89,14 @@ describe('Permission Strategies', () => {
       expect(strategy.hasPermission('user1', ResourceType.USER, Action.DELETE, 'user1')).toBe(true);
     });
 
-    it('should not allow users to manage other users\' resources', () => {
+    it("should not allow users to manage other users' resources", () => {
       expect(strategy.hasPermission('user1', ResourceType.USER, Action.READ, 'user2')).toBe(false);
-      expect(strategy.hasPermission('user1', ResourceType.USER, Action.UPDATE, 'user2')).toBe(false);
-      expect(strategy.hasPermission('user1', ResourceType.USER, Action.DELETE, 'user2')).toBe(false);
+      expect(strategy.hasPermission('user1', ResourceType.USER, Action.UPDATE, 'user2')).toBe(
+        false,
+      );
+      expect(strategy.hasPermission('user1', ResourceType.USER, Action.DELETE, 'user2')).toBe(
+        false,
+      );
     });
   });
-}); 
+});

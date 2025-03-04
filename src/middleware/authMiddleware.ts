@@ -24,22 +24,22 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     }
 
     const token = authHeader.split(' ')[1];
-    
+
     // In a real application, you would verify the JWT token here
     // For this example, we'll assume the token is the user ID
     const user = userService.getUserById(token);
-    
+
     if (!user) {
       res.status(401).json({ message: 'Invalid token' });
       return;
     }
-    
+
     // Attach user to request object
     req.user = {
       id: user.id,
-      role: user.role
+      role: user.role,
     };
-    
+
     next();
   } catch (error) {
     res.status(401).json({ message: 'Authentication failed' });
@@ -47,7 +47,11 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 };
 
 // Generic authorization middleware using the Strategy pattern
-export const authorize = (resourceType: ResourceType, action: Action, getResourceOwnerId?: (req: Request) => string | undefined) => {
+export const authorize = (
+  resourceType: ResourceType,
+  action: Action,
+  getResourceOwnerId?: (req: Request) => string | undefined,
+) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({ message: 'Authentication required' });
@@ -55,17 +59,17 @@ export const authorize = (resourceType: ResourceType, action: Action, getResourc
     }
 
     const resourceOwnerId = getResourceOwnerId ? getResourceOwnerId(req) : undefined;
-    
+
     if (permissionService.hasPermission(req.user.id, resourceType, action, resourceOwnerId)) {
       next();
     } else {
-      res.status(403).json({ 
+      res.status(403).json({
         message: 'Access denied: Your role is not authorized to perform this action',
         details: {
           role: req.user.role,
           resourceType,
-          action
-        }
+          action,
+        },
       });
     }
   };
