@@ -303,14 +303,14 @@ export class TopicService {
       this.topicDao.delete(t => t.id === id);
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'deleteTopic', error, {
         topicId: id,
         cascade: options.cascade,
       });
       return {
         success: false,
-        error: `Failed to delete topic: ${error.message}`,
+        error: `Failed to delete topic: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -326,7 +326,7 @@ export class TopicService {
       for (const childTopic of childTopics) {
         this.deleteTopic(childTopic.id, { cascade: true });
       }
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'deleteChildTopics', error, { parentTopicId });
       throw error; // Re-throw to be handled by the parent method
     }
@@ -362,7 +362,12 @@ export class TopicService {
   }
 
   // Helper method to convert plain object to TopicImpl instance
-  private convertToTopicImpl(topicData: any): TopicImpl {
+  private convertToTopicImpl(
+    topicData: Omit<Topic, 'createdAt' | 'updatedAt'> & {
+      createdAt: string | Date;
+      updatedAt: string | Date;
+    },
+  ): TopicImpl {
     return new TopicImpl(
       topicData.id,
       topicData.name,
@@ -453,7 +458,7 @@ export class TopicService {
 
       // No path found
       return null;
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'findShortestPath', error, { fromTopicId, toTopicId });
       return null;
     }
@@ -487,7 +492,7 @@ export class TopicService {
       }
 
       return null;
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'findLowestCommonAncestor', error, {
         topicId1,
         topicId2,

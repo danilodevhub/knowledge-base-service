@@ -14,7 +14,7 @@ dotenv.config();
 const STORAGE_DIR = process.env.STORAGE_PATH || path.join(process.cwd(), 'storage');
 
 // JSON File DAO Implementation
-export class JsonFileDao<T> implements IDao<T> {
+export class JsonFileDao<T extends { id: string }> implements IDao<T> {
   private filePath: string;
   private readonly SERVICE_NAME = 'JsonFileDao';
 
@@ -37,7 +37,7 @@ export class JsonFileDao<T> implements IDao<T> {
     try {
       const data = fs.readFileSync(this.filePath, 'utf8');
       return JSON.parse(data);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'readData', error, { filePath: this.filePath });
       return [];
     }
@@ -46,9 +46,11 @@ export class JsonFileDao<T> implements IDao<T> {
   private writeData(data: T[]): void {
     try {
       fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), 'utf8');
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       LogUtils.logError(this.SERVICE_NAME, 'writeData', error, { filePath: this.filePath });
-      throw new Error(`Failed to write data to storage: ${error.message}`);
+      throw new Error(
+        `Failed to write data to storage: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -58,7 +60,13 @@ export class JsonFileDao<T> implements IDao<T> {
 
   findById(id: string): T | null {
     const data = this.readData();
-    return data.find((item: any) => item.id === id) || null;
+    const result = data.find(item => item.id === id) || null;
+    LogUtils.logInfo(
+      this.SERVICE_NAME,
+      'findById',
+      `Item ${result ? 'found' : 'not found'} with id: ${id}`,
+    );
+    return result;
   }
 
   findBy(predicate: (item: T) => boolean): T | null {
@@ -95,7 +103,7 @@ export class JsonFileDao<T> implements IDao<T> {
 
 // Factory for creating DAOs
 export class DaoFactory {
-  static createJsonFileDao<T>(fileName: string): IDao<T> {
+  static createJsonFileDao<T extends { id: string }>(fileName: string): IDao<T> {
     return new JsonFileDao<T>(fileName);
   }
 }

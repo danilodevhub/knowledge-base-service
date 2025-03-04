@@ -3,6 +3,9 @@ import { Request, Response, NextFunction } from 'express';
 import { ResourceType, Action } from '../models/permission';
 import { permissionService } from '../services/permissionService';
 import { userService } from '../services/userService';
+import { LogUtils } from '../utils/logUtils';
+
+const SERVICE_NAME = 'AuthMiddleware';
 
 // Extended Request interface to include user property
 export interface AuthRequest extends Request {
@@ -42,6 +45,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
     next();
   } catch (error) {
+    LogUtils.logError(SERVICE_NAME, 'authenticate', error);
     res.status(401).json({ message: 'Authentication failed' });
   }
 };

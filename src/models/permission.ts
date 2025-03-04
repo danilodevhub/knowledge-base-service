@@ -28,10 +28,13 @@ export interface PermissionStrategy {
 // Admin Permission Strategy
 export class AdminPermissionStrategy implements PermissionStrategy {
   hasPermission(
-    userId: string,
-    resourceType: ResourceType,
-    action: Action,
-    resourceOwnerId?: string,
+    _userId: string,
+
+    _resourceType: ResourceType,
+
+    _action: Action,
+
+    _resourceOwnerId?: string,
   ): boolean {
     // Admins can do anything
     return true;
@@ -41,10 +44,10 @@ export class AdminPermissionStrategy implements PermissionStrategy {
 // Editor Permission Strategy
 export class EditorPermissionStrategy implements PermissionStrategy {
   hasPermission(
-    userId: string,
+    _userId: string,
     resourceType: ResourceType,
     action: Action,
-    resourceOwnerId?: string,
+    _resourceOwnerId?: string,
   ): boolean {
     // Editors can create, read, update topics but cannot delete them
     // Editors cannot manage system settings or users
@@ -63,10 +66,10 @@ export class EditorPermissionStrategy implements PermissionStrategy {
 // Viewer Permission Strategy
 export class ViewerPermissionStrategy implements PermissionStrategy {
   hasPermission(
-    userId: string,
+    _userId: string,
     resourceType: ResourceType,
     action: Action,
-    resourceOwnerId?: string,
+    _resourceOwnerId?: string,
   ): boolean {
     // Viewers can only read topics
     return resourceType === ResourceType.TOPIC && action === Action.READ;
@@ -77,8 +80,8 @@ export class ViewerPermissionStrategy implements PermissionStrategy {
 export class SelfPermissionStrategy implements PermissionStrategy {
   hasPermission(
     userId: string,
-    resourceType: ResourceType,
-    action: Action,
+    _resourceType: ResourceType,
+    _action: Action,
     resourceOwnerId?: string,
   ): boolean {
     // Users can manage their own resources

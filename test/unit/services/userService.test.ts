@@ -116,7 +116,7 @@ describe('UserService', () => {
 
     it('should create a DAO using DaoFactory if none is provided', () => {
       // Create a new service without passing a DAO
-      const service = new UserService();
+      new UserService();
 
       // Verify that DaoFactory.createJsonFileDao was called
       expect(createJsonFileDaoSpy).toHaveBeenCalledWith('users.json');

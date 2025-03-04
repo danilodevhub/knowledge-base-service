@@ -9,10 +9,16 @@ export class LogUtils {
    * @param error The error object
    * @param context Optional additional context
    */
-  static logError(service: string, operation: string, error: any, context?: any): void {
+  static logError(
+    service: string,
+    operation: string,
+    error: Error | unknown,
+    context?: Record<string, unknown>,
+  ): void {
+    // eslint-disable-next-line no-console
     console.error(
       `[${service}] Error during ${operation}:`,
-      error.message || error,
+      error instanceof Error ? error.message : String(error),
       context ? `\nContext: ${JSON.stringify(context)}` : '',
     );
   }
@@ -24,7 +30,13 @@ export class LogUtils {
    * @param message Warning message
    * @param context Optional additional context
    */
-  static logWarning(service: string, operation: string, message: string, context?: any): void {
+  static logWarning(
+    service: string,
+    operation: string,
+    message: string,
+    context?: Record<string, unknown>,
+  ): void {
+    // eslint-disable-next-line no-console
     console.warn(
       `[${service}] Warning during ${operation}:`,
       message,
@@ -39,7 +51,13 @@ export class LogUtils {
    * @param message Info message
    * @param context Optional additional context
    */
-  static logInfo(service: string, operation: string, message: string, context?: any): void {
+  static logInfo(
+    service: string,
+    operation: string,
+    message: string,
+    context?: Record<string, unknown>,
+  ): void {
+    // eslint-disable-next-line no-console
     console.log(
       `[${service}] Info during ${operation}:`,
       message,

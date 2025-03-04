@@ -225,7 +225,6 @@ class MockVersionDao implements IDao<TopicVersion> {
   }
 
   delete(predicate: (item: TopicVersion) => boolean): void {
-    const initialLength = this.versions.length;
     this.versions = this.versions.filter(v => !predicate(v));
   }
 }
@@ -271,7 +270,7 @@ describe('TopicService', () => {
     });
 
     it('should create dependencies using DaoFactory if none provided', () => {
-      const service = new TopicService();
+      new TopicService();
       expect(createJsonFileDaoSpy).toHaveBeenCalledWith('topics.json');
       expect(createJsonFileDaoSpy).toHaveBeenCalledWith('topic-versions.json');
     });
