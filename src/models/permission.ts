@@ -12,8 +12,7 @@ export enum Action {
   CREATE = 'create',
   READ = 'read',
   UPDATE = 'update',
-  DELETE = 'delete',
-  MANAGE = 'manage' // Special action for administrative tasks
+  DELETE = 'delete',  
 }
 
 // Permission Strategy interface

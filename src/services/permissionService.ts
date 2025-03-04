@@ -80,13 +80,6 @@ export class PermissionService {
   canDelete(userId: string, resourceType: ResourceType, resourceOwnerId?: string): boolean {
     return this.hasPermission(userId, resourceType, Action.DELETE, resourceOwnerId);
   }
-
-  /**
-   * Check if a user can manage a resource (administrative tasks)
-   */
-  canManage(userId: string, resourceType: ResourceType): boolean {
-    return this.hasPermission(userId, resourceType, Action.MANAGE);
-  }
 }
 
 // Export singleton instance
