@@ -73,6 +73,24 @@ npm run build
 npm start
 ```
 
+## Running Tests
+
+To run the tests, use the following commands:
+
+```bash
+# Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (useful during development)
+npm run test:watch
+```
+
 ## Authentication
 
 This service uses role-based access control with the following roles:

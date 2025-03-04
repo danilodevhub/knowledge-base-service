@@ -7,18 +7,20 @@ import {
   ResourceType,
   Action
 } from '../models/permission';
-import { userService } from './userService';
+import { userService as defaultUserService, UserService } from './userService';
 
 export class PermissionService {
   private strategies: Map<string, PermissionStrategy> = new Map();
   private selfStrategy: SelfPermissionStrategy;
+  private userService: UserService;
 
-  constructor() {
+  constructor(userServiceInstance: UserService = defaultUserService) {
     // Initialize strategies
     this.strategies.set('admin', new AdminPermissionStrategy());
     this.strategies.set('editor', new EditorPermissionStrategy());
     this.strategies.set('viewer', new ViewerPermissionStrategy());
     this.selfStrategy = new SelfPermissionStrategy();
+    this.userService = userServiceInstance;
   }
 
   /**
@@ -31,7 +33,7 @@ export class PermissionService {
    */
   hasPermission(userId: string, resourceType: ResourceType, action: Action, resourceOwnerId?: string): boolean {
     // Get the user's role
-    const user = userService.getUserById(userId);
+    const user = this.userService.getUserById(userId);
     
     if (!user) {
       return false;
