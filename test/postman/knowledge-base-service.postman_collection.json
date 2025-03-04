@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "6afdb4fd-fbb9-4bdf-9e1f-f418b48989e3",
+		"name": "knowledge-base-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41759547"
+	},
+	"item": [
+		{
+			"name": "/topics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174002",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicId}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174000",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicId}}/versions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174001",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicId}}/versions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicId}}",
+						"versions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicId}}/versions/{{version}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174001",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicId}}/versions/{{version}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicId}}",
+						"versions",
+						"{{version}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicId}}/hierarchy",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174002",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicId}}/hierarchy",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicId}}",
+						"hierarchy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174001",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"FIFA World Cup\",\n  \"content\": \"The FIFA World Cup is the most prestigious soccer tournament, held every four years since 1930, except in 1942 and 1946. It features national teams from around the globe competing for the title, showcasing the sport's passion and talent on the world stage.\",\n  \"parentTopicId\": \"c8278c6b-a2b1-4ca3-a3f5-ea6fcdff97fb\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicIdToUpdate}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174001",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Introduction about Soccer - v3\",\n  \"content\": \"Soccer, known as football in many countries, is the world's most popular sport. Played by two teams of eleven, it involves scoring goals by getting a ball into the opponent's net. With rich history and global appeal, it unites millions of fans worldwide.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicIdToDelete}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicIdToDelete}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/topics/{{topicIdToUpdate}}",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "123e4567-e89b-12d3-a456-426614174002",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/knowledge-base/topics/{{topicIdToUpdate}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"knowledge-base",
+						"topics",
+						"{{topicIdToUpdate}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
