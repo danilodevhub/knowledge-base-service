@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon",
+    "dev:debug": "node --require ts-node/register src/server.ts",
     "build": "tsc -p tsconfig.build.json",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --watch --config jest.config.cjs",
+    "test:coverage": "jest --coverage --config jest.config.cjs",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "format": "prettier --write \"{src,test}/**/*.ts\"",
     "lint:check": "eslint \"{src,test}/**/*.ts\"",
@@ -52,5 +52,8 @@
     ],
     "ext": "ts",
     "exec": "ts-node src/server.ts"
+  },
+  "ts-node": {
+    "transpileOnly": false
   }
 }
