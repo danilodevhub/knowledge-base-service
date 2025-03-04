@@ -82,5 +82,41 @@
     "updatedAt": "2025-03-03T19:33:45.024Z",
     "resource": null,
     "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "ca44696d-6664-47c7-a13e-150fa1e91375",
+    "topicId": "7c9a2c2e-9c59-44b3-b1f7-2b5aae8bd769",
+    "name": "Soccer Rules",
+    "content": "Soccer rules, governed by the Laws of the Game established by FIFA, dictate how the game is played. They cover aspects like player conduct, scoring, fouls, and offside, ensuring fair play and consistency. Understanding these rules is essential for players, officials, and fans alike.",
+    "parentTopicId": "67c27eed-bc70-4a9e-8c39-801323b3bc7c",
+    "version": 1,
+    "createdAt": "2025-03-04T19:38:56.322Z",
+    "updatedAt": "2025-03-04T19:38:56.322Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "722e710a-c7eb-4963-b1dd-6f541dfd7f84",
+    "topicId": "ef1ac5c6-a750-48bf-83da-ef72bebb1be1",
+    "name": "Fouls in Soccer",
+    "content": "Fouls occur when players violate the Laws of the Game, such as tripping, pushing, or holding opponents. The severity of a foul determines the punishment, ranging from free kicks to penalty kicks. Maintaining fair play is crucial, as fouls can significantly impact the game's outcome.",
+    "parentTopicId": "7c9a2c2e-9c59-44b3-b1f7-2b5aae8bd769",
+    "version": 1,
+    "createdAt": "2025-03-04T19:39:49.765Z",
+    "updatedAt": "2025-03-04T19:39:49.765Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
+  },
+  {
+    "id": "bfe2a357-76fd-4d18-ad2e-c959d7afbe2e",
+    "topicId": "a9aa453e-70e8-4959-b74f-21d29d26faeb",
+    "name": "Offside Rule",
+    "content": "The offside rule prevents attacking players from gaining an unfair advantage. A player is considered offside if they are closer to the opponent's goal line than the second-to-last defender when the ball is played to them, unless they are in their own half. This rule encourages teamwork and strategic play.",
+    "parentTopicId": "7c9a2c2e-9c59-44b3-b1f7-2b5aae8bd769",
+    "version": 1,
+    "createdAt": "2025-03-04T19:40:30.696Z",
+    "updatedAt": "2025-03-04T19:40:30.696Z",
+    "resource": null,
+    "ownerId": "123e4567-e89b-12d3-a456-426614174001"
   }
 ]

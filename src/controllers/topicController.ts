@@ -360,4 +360,66 @@ export const getTopicHierarchy = (req: AuthRequest, res: Response, next: NextFun
   } catch (error) {
     next(error);
   }
+};
+
+// GET shortest path between topics
+export const getShortestPath = (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+        const { fromId, toId } = req.params;
+
+        if (!fromId || !toId) {
+            res.status(400).json({ message: 'Both fromId and toId are required' });
+            return;
+        }
+
+        const result = topicService.findShortestPath(fromId, toId);
+        
+        if (!result) {
+            res.status(404).json({ message: 'No path found between the specified topics' });
+            return;
+        }
+        
+        res.status(200).json({
+            path: result.path.map(topic => ({
+                id: topic.id,
+                name: topic.name,
+                parentTopicId: topic.parentTopicId
+            })),
+            distance: result.distance
+        });
+    } catch (error: any) {
+        logError('getShortestPath', error, { fromId: req.params.fromId, toId: req.params.toId });
+        next(error);
+    }
+};
+
+// GET lowest common ancestor
+export const getLowestCommonAncestor = (req: AuthRequest, res: Response, next: NextFunction): void => {
+    try {
+        const { topicId1, topicId2 } = req.params;
+
+        if (!topicId1 || !topicId2) {
+            res.status(400).json({ message: 'Both topic IDs are required' });
+            return;
+        }
+
+        const ancestor = topicService.findLowestCommonAncestor(topicId1, topicId2);
+        
+        if (!ancestor) {
+            res.status(404).json({ message: 'No common ancestor found' });
+            return;
+        }
+        
+        res.status(200).json({
+            id: ancestor.id,
+            name: ancestor.name,
+            parentTopicId: ancestor.parentTopicId
+        });
+    } catch (error: any) {
+        logError('getLowestCommonAncestor', error, { 
+            topicId1: req.params.topicId1, 
+            topicId2: req.params.topicId2 
+        });
+        next(error);
+    }
 }; 
