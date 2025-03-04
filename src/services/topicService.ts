@@ -1,9 +1,10 @@
+import { v4 as uuidv4 } from 'uuid';
+
+import { DaoFactory } from '../dao/daoFactory';
+import { IDao } from '../dao/IDao';
 import { Topic, TopicVersion } from '../models/topic';
 import { TopicImpl, TopicVersionImpl, TopicFactoryImpl, CompositeTopic } from '../models/topicImpl';
 import { TopicResource } from '../models/topicResource';
-import { IDao } from '../dao/IDao';
-import { DaoFactory } from '../dao/daoFactory';
-import { v4 as uuidv4 } from 'uuid';
 import { LogUtils } from '../utils/logUtils';
 
 export interface PathNode {
@@ -36,7 +37,7 @@ export class TopicService {
 
     // Get a specific topic by ID (latest version)
     getTopicById(id: string): Topic | null {
-        if (!id) return null;
+        if (!id) {return null;}
         
         const topicData = this.topicDao.findById(id);
         if (!topicData) {
@@ -47,7 +48,7 @@ export class TopicService {
 
     // Get a specific version of a topic
     getTopicVersion(id: string, version: number): TopicVersion | null {
-        if (!id) return null;
+        if (!id) {return null;}
         
         const versionData = this.versionDao.findBy(tv => tv.topicId === id && tv.version === version);
         if (!versionData) {
@@ -69,7 +70,7 @@ export class TopicService {
 
     // Get all versions of a topic
     getAllTopicVersions(id: string): TopicVersion[] {
-        if (!id) return [];
+        if (!id) {return [];}
         
         const versions = this.versionDao.findManyBy(tv => tv.topicId === id);
         return versions.map(version => new TopicVersionImpl(
@@ -231,7 +232,7 @@ export class TopicService {
 
     // Remove a resource from a topic
     removeTopicResource(id: string): Topic | null {
-        if (!id) return null;
+        if (!id) {return null;}
         
         const topic = this.getTopicById(id);
         
@@ -298,7 +299,7 @@ export class TopicService {
 
     // Helper method to delete child topics
     private deleteChildTopics(parentTopicId: string): void {
-        if (!parentTopicId) return;
+        if (!parentTopicId) {return;}
         
         try {
             const childTopics = this.topicDao.findManyBy(t => t.parentTopicId === parentTopicId);
@@ -313,7 +314,7 @@ export class TopicService {
 
     // Get topic hierarchy using composite pattern
     getTopicHierarchy(id: string): CompositeTopic | null {
-        if (!id) return null;
+        if (!id) {return null;}
         
         const topic = this.getTopicById(id);
         
@@ -467,14 +468,14 @@ export class TopicService {
 
     // Helper method to get path from topic to root
     private getPathToRoot(topic: Topic): Topic[] {
-        if (!topic) return [];
+        if (!topic) {return [];}
         
         const path: Topic[] = [topic];
         let current: Topic | null = topic;
 
         while (current?.parentTopicId) {
             const parent = this.getTopicById(current.parentTopicId);
-            if (!parent) break;
+            if (!parent) {break;}
             path.push(parent);
             current = parent;
         }

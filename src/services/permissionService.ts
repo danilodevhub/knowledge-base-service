@@ -7,6 +7,7 @@ import {
   ResourceType,
   Action
 } from '../models/permission';
+
 import { userService as defaultUserService, UserService } from './userService';
 
 export class PermissionService {

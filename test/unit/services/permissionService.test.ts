@@ -1,6 +1,6 @@
-import { PermissionService } from '../../../src/services/permissionService';
 import { ResourceType, Action } from '../../../src/models/permission';
 import { User } from '../../../src/models/user';
+import { PermissionService } from '../../../src/services/permissionService';
 import * as userServiceModule from '../../../src/services/userService';
 
 // Mock user data

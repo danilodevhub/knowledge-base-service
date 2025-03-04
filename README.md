@@ -92,6 +92,33 @@ npm run test:coverage
 npm run test:watch
 ```
 
+## Code Style and Linting
+
+This project uses ESLint and Prettier to maintain code quality and consistent formatting:
+
+```bash
+# Check code for linting issues
+npm run lint:check
+
+# Fix linting issues automatically
+npm run lint
+
+# Check code formatting
+npm run format:check
+
+# Format code
+npm run format
+```
+
+The linting configuration enforces:
+- TypeScript best practices
+- Consistent code formatting
+- Proper error handling
+- No use of console.log (use LogUtils instead)
+- Many other code quality rules
+
+For VS Code users, the project includes settings for automatic formatting on save and ESLint integration.
+
 ## Authentication
 
 This service uses role-based access control with the following roles:

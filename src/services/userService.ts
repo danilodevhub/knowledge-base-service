@@ -1,6 +1,6 @@
-import { User } from '../models/user';
-import { IDao } from '../dao/IDao';
 import { DaoFactory } from '../dao/daoFactory';
+import { IDao } from '../dao/IDao';
+import { User } from '../models/user';
 
 export class UserService {
   private userDao: IDao<User>;
@@ -11,13 +11,13 @@ export class UserService {
 
   // Get user by ID
   getUserById(id: string): User | null {
-    if (!id) return null;
+    if (!id) {return null;}
     return this.userDao.findById(id);
   }
 
   // Get user by email
   getUserByEmail(email: string): User | null {
-    if (!email) return null;
+    if (!email) {return null;}
     
     // Use case-insensitive comparison for email lookups
     return this.userDao.findBy(user => 

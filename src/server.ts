@@ -1,6 +1,8 @@
-import app from './app';
-import dotenv from 'dotenv';
 import http from 'http';
+
+import dotenv from 'dotenv';
+
+import app from './app';
 import { LogUtils } from './utils/logUtils';
 
 // Load environment variables

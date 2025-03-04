@@ -1,8 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+
 import dotenv from 'dotenv';
-import { IDao } from './IDao';
+
 import { LogUtils } from '../utils/logUtils';
+
+import { IDao } from './IDao';
 
 // Load environment variables
 dotenv.config();

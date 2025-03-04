@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 import { LogUtils } from '../utils/logUtils';
 
 const SERVICE_NAME = 'InitStorage';

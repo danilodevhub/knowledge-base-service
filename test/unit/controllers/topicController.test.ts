@@ -1,11 +1,12 @@
-import { TopicController } from '../../../src/controllers/topicController';
-import { TopicService } from '../../../src/services/topicService';
-import { permissionService } from '../../../src/services/permissionService';
 import { Response, NextFunction } from 'express';
+
+import { TopicController } from '../../../src/controllers/topicController';
 import { AuthRequest } from '../../../src/middleware/authMiddleware';
-import { LogUtils } from '../../../src/utils/logUtils';
-import { Topic } from '../../../src/models/topic';
 import { ResourceType, Action } from '../../../src/models/permission';
+import { Topic } from '../../../src/models/topic';
+import { permissionService } from '../../../src/services/permissionService';
+import { TopicService } from '../../../src/services/topicService';
+import { LogUtils } from '../../../src/utils/logUtils';
 
 // Mock the dependencies
 jest.mock('../../../src/services/topicService');

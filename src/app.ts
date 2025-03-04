@@ -1,11 +1,10 @@
-import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { errorHandler } from './middleware/errorHandler';
-import { userService } from './services/userService';
+import express, { Express, Request, Response } from 'express';
 
-// Import routes
+import { errorHandler } from './middleware/errorHandler';
 import topicRoutes from './routes/topicRoutes';
+import { userService } from './services/userService';
 
 // Load environment variables
 dotenv.config();
@@ -20,21 +19,21 @@ app.use(express.urlencoded({ extended: true }));
 // Authentication endpoint
 app.post('/auth/login', (req: Request, res: Response): void => {
   const { email, password } = req.body;
-  
+
   if (!email || !password) {
     res.status(400).json({ message: 'Email and password are required' });
     return;
   }
-  
+
   // In a real application, you would verify the password
   // For this example, we'll just check if the user exists
   const user = userService.getUserByEmail(email);
-  
+
   if (!user) {
     res.status(401).json({ message: 'Invalid credentials' });
     return;
   }
-  
+
   // In a real application, you would generate a JWT token
   // For this example, we'll just return the user ID as the token
   res.status(200).json({
@@ -44,8 +43,8 @@ app.post('/auth/login', (req: Request, res: Response): void => {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role
-    }
+      role: user.role,
+    },
   });
 });
 

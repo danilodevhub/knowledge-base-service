@@ -1,7 +1,7 @@
-import { UserService } from '../../../src/services/userService';
-import { User } from '../../../src/models/user';
-import { IDao } from '../../../src/dao/IDao';
 import * as daoFactoryModule from '../../../src/dao/daoFactory';
+import { IDao } from '../../../src/dao/IDao';
+import { User } from '../../../src/models/user';
+import { UserService } from '../../../src/services/userService';
 
 // Mock user data
 const mockUsers: User[] = [

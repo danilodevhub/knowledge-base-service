@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { userService } from '../services/userService';
-import { permissionService } from '../services/permissionService';
+
 import { ResourceType, Action } from '../models/permission';
+import { permissionService } from '../services/permissionService';
+import { userService } from '../services/userService';
 
 // Extended Request interface to include user property
 export interface AuthRequest extends Request {

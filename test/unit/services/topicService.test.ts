@@ -1,9 +1,9 @@
-import { TopicService } from '../../../src/services/topicService';
+import * as daoFactoryModule from '../../../src/dao/daoFactory';
+import { IDao } from '../../../src/dao/IDao';
 import { Topic, TopicVersion } from '../../../src/models/topic';
 import { TopicFactoryImpl } from '../../../src/models/topicImpl';
 import { TopicResource } from '../../../src/models/topicResource';
-import { IDao } from '../../../src/dao/IDao';
-import * as daoFactoryModule from '../../../src/dao/daoFactory';
+import { TopicService } from '../../../src/services/topicService';
 
 // Mock LogUtils to avoid console output during tests
 jest.mock('../../../src/utils/logUtils', () => ({

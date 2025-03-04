@@ -1,9 +1,9 @@
-import { NextFunction } from 'express';
-import { TopicService } from '../services/topicService';
+import { NextFunction , Response } from 'express';
+
 import { AuthRequest } from '../middleware/authMiddleware';
-import { Response } from 'express';
 import { ResourceType, Action } from '../models/permission';
 import { permissionService } from '../services/permissionService';
+import { TopicService } from '../services/topicService';
 import { LogUtils } from '../utils/logUtils';
 
 // Service name constant for logging
