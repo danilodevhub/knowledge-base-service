@@ -9,7 +9,9 @@ import {
     deleteTopic,
     getTopicHierarchy,
     setTopicResource,
-    removeTopicResource
+    removeTopicResource,
+    getShortestPath,
+    getLowestCommonAncestor
 } from '../controllers/topicController';
 import { 
     authenticate, 
@@ -36,6 +38,12 @@ router.get('/:id/versions/:version', authenticate, authorizeTopicRead, getTopicV
 
 // GET topic hierarchy
 router.get('/:id/hierarchy', authenticate, authorizeTopicRead, getTopicHierarchy);
+
+// GET shortest path between topics
+router.get('/path/:fromId/:toId', authenticate, authorizeTopicRead, getShortestPath);
+
+// GET lowest common ancestor of two topics
+router.get('/ancestor/:topicId1/:topicId2', authenticate, authorizeTopicRead, getLowestCommonAncestor);
 
 // Protected routes - authentication and authorization required
 // POST a new topic
