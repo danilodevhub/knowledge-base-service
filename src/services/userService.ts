@@ -5,18 +5,24 @@ import { DaoFactory } from '../dao/daoFactory';
 export class UserService {
   private userDao: IDao<User>;
 
-  constructor() {
-    this.userDao = DaoFactory.createJsonFileDao<User>('users.json');
+  constructor(userDao?: IDao<User>) {
+    this.userDao = userDao || DaoFactory.createJsonFileDao<User>('users.json');
   }
 
   // Get user by ID
   getUserById(id: string): User | null {
+    if (!id) return null;
     return this.userDao.findById(id);
   }
 
   // Get user by email
   getUserByEmail(email: string): User | null {
-    return this.userDao.findBy(user => user.email === email);
+    if (!email) return null;
+    
+    // Use case-insensitive comparison for email lookups
+    return this.userDao.findBy(user => 
+      user.email.toLowerCase() === email.toLowerCase()
+    );
   }
 
   // Check if user has admin role
