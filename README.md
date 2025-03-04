@@ -86,16 +86,21 @@ Authentication is implemented via middleware that checks user roles and ownershi
 
 ### Topics
 
+#### Basic CRUD Operations
 - `GET /topics` - Get all topics (latest versions)
 - `GET /topics/:id` - Get a specific topic by ID (latest version)
-- `GET /topics/:id/versions` - Get all versions of a topic
-- `GET /topics/:id/versions/:version` - Get a specific version of a topic
-- `GET /topics/:id/hierarchy` - Get the topic hierarchy starting from a specific topic
-- `GET /topics/path/:fromId/:toId` - Find shortest path between two topics
-- `GET /topics/ancestor/:topicId1/:topicId2` - Find lowest common ancestor of two topics
 - `POST /topics` - Create a new topic
 - `PUT /topics/:id` - Update a topic (creates a new version)
 - `DELETE /topics/:id` - Delete a topic (add ?cascade=true to delete children)
+
+#### Version Control
+- `GET /topics/:id/versions` - Get all versions of a topic
+- `GET /topics/:id/versions/:version` - Get a specific version of a topic
+
+#### Hierarchy Operations
+- `GET /topics/:id/hierarchy` - Get the topic hierarchy starting from a specific topic
+- `GET /topics/path/:fromId/:toId` - Find shortest path between two topics
+- `GET /topics/ancestor/:topicId1/:topicId2` - Find lowest common ancestor of two topics
 
 ### Topic Resources
 - `PUT /topics/:id/resource` - Set a resource for a topic
@@ -146,12 +151,73 @@ Content-Type: application/json
 }
 ```
 
+### Find Shortest Path
+
+**Request:**
+```http
+GET /topics/path/123e4567-e89b-12d3-a456-426614174000/987fcdeb-a89b-12d3-a456-426614174000
+```
+
+**Response:**
+```json
+{
+  "path": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Introduction to Soccer",
+      "version": 1
+    },
+    {
+      "id": "456e4567-e89b-12d3-a456-426614174000",
+      "name": "Soccer Rules",
+      "version": 1
+    },
+    {
+      "id": "987fcdeb-a89b-12d3-a456-426614174000",
+      "name": "Offside Rule",
+      "version": 1
+    }
+  ],
+  "distance": 2
+}
+```
+
+### Find Lowest Common Ancestor
+
+**Request:**
+```http
+GET /topics/ancestor/123e4567-e89b-12d3-a456-426614174000/987fcdeb-a89b-12d3-a456-426614174000
+```
+
+**Response:**
+```json
+{
+  "ancestor": {
+    "id": "456e4567-e89b-12d3-a456-426614174000",
+    "name": "Soccer Rules",
+    "version": 1
+  },
+  "distanceToFirst": 1,
+  "distanceToSecond": 1
+}
+```
+
 ### Error Responses
 
 ```json
-// 404 Not Found
+// 404 Not Found (Path not found)
+{
+  "message": "No path found between topics"
+}
+
+// 404 Not Found (Topic not found)
 {
   "message": "Topic not found"
+}
+
+// 400 Bad Request (Same topic)
+{
+  "message": "Source and target topics must be different"
 }
 
 // 403 Forbidden
