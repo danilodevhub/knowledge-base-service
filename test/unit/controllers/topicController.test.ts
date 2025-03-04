@@ -1,17 +1,17 @@
-import { TopicController } from '../../src/controllers/topicController';
-import { TopicService } from '../../src/services/topicService';
-import { permissionService } from '../../src/services/permissionService';
+import { TopicController } from '../../../src/controllers/topicController';
+import { TopicService } from '../../../src/services/topicService';
+import { permissionService } from '../../../src/services/permissionService';
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from '../../src/middleware/authMiddleware';
-import { LogUtils } from '../../src/utils/logUtils';
-import { Topic } from '../../src/models/topic';
-import { TopicResource } from '../../src/models/topicResource';
-import { ResourceType, Action } from '../../src/models/permission';
+import { AuthRequest } from '../../../src/middleware/authMiddleware';
+import { LogUtils } from '../../../src/utils/logUtils';
+import { Topic } from '../../../src/models/topic';
+import { TopicResource } from '../../../src/models/topicResource';
+import { ResourceType, Action } from '../../../src/models/permission';
 
 // Mock the dependencies
-jest.mock('../../src/services/topicService');
-jest.mock('../../src/services/permissionService');
-jest.mock('../../src/utils/logUtils');
+jest.mock('../../../src/services/topicService');
+jest.mock('../../../src/services/permissionService');
+jest.mock('../../../src/utils/logUtils');
 
 // Define a mock topic for testing
 const mockTopic: Topic = {

@@ -5,7 +5,7 @@ import {
   EditorPermissionStrategy, 
   ViewerPermissionStrategy,
   SelfPermissionStrategy
-} from '../../src/models/permission';
+} from '../../../src/models/permission';
 
 describe('Permission Strategies', () => {
   describe('AdminPermissionStrategy', () => {

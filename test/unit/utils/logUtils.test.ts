@@ -1,4 +1,4 @@
-import { LogUtils } from '../../src/utils/logUtils';
+import { LogUtils } from '../../../src/utils/logUtils';
 
 describe('LogUtils', () => {
   const originalConsoleError = console.error;

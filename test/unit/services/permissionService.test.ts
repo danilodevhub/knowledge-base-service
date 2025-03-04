@@ -1,7 +1,7 @@
-import { PermissionService } from '../../src/services/permissionService';
-import { ResourceType, Action } from '../../src/models/permission';
-import { User } from '../../src/models/user';
-import * as userServiceModule from '../../src/services/userService';
+import { PermissionService } from '../../../src/services/permissionService';
+import { ResourceType, Action } from '../../../src/models/permission';
+import { User } from '../../../src/models/user';
+import * as userServiceModule from '../../../src/services/userService';
 
 // Mock user data
 const mockUsers: { [key: string]: User } = {
